@@ -329,7 +329,6 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
 <div class="page active" id="page-onboarding">
   <div class="ob-progress" id="obProgress">
     <div class="ob-dots" id="obDots"></div>
-    <div class="ob-skip" id="obSkip" onclick="obNext()">Skip</div>
   </div>
 
   <!-- Step 0: Welcome — EXCITEMENT FIRST -->
@@ -387,7 +386,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
         <div class="habit-tile" data-habit="Sleep 8hrs" data-icon="😴" data-color="hi-star" onclick="toggleTile(this)"><div class="habit-tile-icon">😴</div><div class="habit-tile-name">Sleep 8hrs</div><div class="habit-tile-desc">Bed by 10pm</div></div>
       </div>
       <div class="custom-row">
-        <input class="custom-input" id="customInput" placeholder="Add your own habit..." maxlength="28"/>
+        <input class="custom-input" id="customInput" placeholder="Add your own habit..." maxlength="28" onkeydown="if(event.key==='Enter'){addCustomTile();event.preventDefault();}"/>
         <button class="add-btn" onclick="addCustomTile()">+ Add</button>
       </div>
     </div>
@@ -927,7 +926,6 @@ function obRenderDots() {
     return `<div class="ob-dot ${c}"></div>`;
   }).join('');
   document.getElementById('obBack').style.display = obStep>0?'flex':'none';
-  document.getElementById('obSkip').style.display = obStep<OB_TOTAL-1?'block':'none';
 }
 
 function obUpdateCta() {
