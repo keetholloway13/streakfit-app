@@ -783,12 +783,17 @@ async function dbLoadUser(userId) {
     state.rescueUsed = user.rescue_used;
     state.isPremium = user.is_premium || false;
     state.notifTime = user.notif_time || '08:00';
-    state.habits = (habits||[]).map((h, i) => ({
-      id: i + 1, dbId: h.id, name: h.name, icon: h.icon,
-      color: h.color, streak: h.streak || 0, meta: h.meta,
-      done: doneIds.has(h.id),
-      streakCountedToday: doneIds.has(h.id), // already counted if logged today
-    }));
+    state.habits = (habits||[]).map((h, i) => {
+      const alreadyDone = doneIds.has(h.id); // h.id is the Supabase UUID
+      return {
+        id: i + 1,       // local display id
+        dbId: h.id,      // Supabase UUID used for DB operations
+        name: h.name, icon: h.icon,
+        color: h.color, streak: h.streak || 0, meta: h.meta,
+        done: alreadyDone,
+        streakCountedToday: alreadyDone,
+      };
+    });
     // if all habits were already done today, mark streak as already extended
     const lastExtended = user.streak_extended_date || '';
     state.streakExtendedToday = lastExtended === today;
