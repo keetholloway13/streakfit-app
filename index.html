@@ -499,46 +499,86 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
     <div class="page-sub" id="streakPageSub">Your streak protection tools</div>
   </div>
 
-  <div class="risk-banner">
-    <div style="font-size:34px;">🔥</div>
-    <div style="flex:1;">
-      <div class="risk-title"><span id="riskStreakNum">0</span>-day streak</div>
-      <div class="risk-sub" id="riskSubText">Use a freeze or rescue if you ever miss a day.</div>
+  <!-- SAFE STATE -->
+  <div id="streakSafeView">
+    <div class="risk-banner" style="background:var(--green-bg);border-color:rgba(0,201,160,0.2);">
+      <div style="font-size:34px;">🔥</div>
+      <div style="flex:1;">
+        <div class="risk-title" style="color:var(--green);"><span id="riskStreakNum">0</span>-day streak</div>
+        <div class="risk-sub" id="riskSubText">You're on track — keep it up!</div>
+      </div>
+      <div class="risk-num" id="riskNum" style="color:var(--green);">0</div>
     </div>
-    <div class="risk-num" id="riskNum">0</div>
+
+    <div class="section" style="margin-top:18px;">
+      <div style="background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:20px;text-align:center;">
+        <div style="font-size:32px;margin-bottom:10px;">🛡️</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;">Streak is safe</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5;">If you ever miss a day, come back here to use a freeze or rescue before your streak resets.</div>
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:space-around;">
+          <div style="text-align:center;">
+            <div style="font-size:18px;font-weight:700;color:var(--amber);" id="safeFreezesLeft">1</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">❄️ freezes left</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:18px;font-weight:700;color:var(--green);" id="safeRescuesLeft">1</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">⚡ rescues left</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="section">
-    <div class="section-header"><span class="section-title">Your options</span></div>
-
-    <div class="option-card" id="freezeCard">
-      <div class="option-top">
-        <div class="option-left">
-          <div class="opt-icon" style="background:var(--amber-bg)">❄️</div>
-          <div><div class="opt-name">Streak freeze</div><div class="opt-desc">Protects your streak for 1 missed day.</div></div>
-        </div>
-        <div class="opt-badge badge-avail" id="freezeBadge">1 left</div>
+  <!-- AT RISK STATE -->
+  <div id="streakRiskView" style="display:none;">
+    <div class="risk-banner">
+      <div style="font-size:34px;">⚠️</div>
+      <div style="flex:1;">
+        <div class="risk-title"><span id="riskStreakNum2">0</span>-day streak at risk!</div>
+        <div class="risk-sub">You missed yesterday — act now before it resets.</div>
       </div>
-      <div class="tokens-row" id="freezeTokens">
-        <div class="token t-amber">❄️</div>
-        <div class="token-lbl">1 lifetime freeze remaining</div>
-      </div>
-      <button class="action-btn btn-amber" id="freezeBtn" onclick="useFreeze()">Use freeze — save my streak</button>
+      <div class="risk-num" id="riskNum2">0</div>
     </div>
 
-    <div class="option-card" id="rescueCard">
-      <div class="option-top">
-        <div class="option-left">
-          <div class="opt-icon" style="background:var(--green-bg)">⚡</div>
-          <div><div class="opt-name">Streak rescue</div><div class="opt-desc">Complete double habits today to earn it back.</div></div>
+    <div class="section">
+      <div class="section-header"><span class="section-title">Save your streak</span></div>
+
+      <div class="option-card" id="freezeCard">
+        <div class="option-top">
+          <div class="option-left">
+            <div class="opt-icon" style="background:var(--amber-bg)">❄️</div>
+            <div><div class="opt-name">Streak freeze</div><div class="opt-desc">Instantly protects your streak for this missed day.</div></div>
+          </div>
+          <div class="opt-badge badge-avail" id="freezeBadge">1 left</div>
         </div>
-        <div class="opt-badge badge-avail" id="rescueBadge">1 left</div>
+        <div class="tokens-row" id="freezeTokens">
+          <div class="token t-amber">❄️</div>
+          <div class="token-lbl">1 lifetime freeze remaining</div>
+        </div>
+        <button class="action-btn btn-amber" id="freezeBtn" onclick="useFreeze()">Use freeze — save my streak now</button>
       </div>
-      <div class="tokens-row" id="rescueTokens">
-        <div class="token t-green">⚡</div>
-        <div class="token-lbl">1 lifetime rescue remaining</div>
+
+      <div class="option-card" id="rescueCard">
+        <div class="option-top">
+          <div class="option-left">
+            <div class="opt-icon" style="background:var(--green-bg)">⚡</div>
+            <div><div class="opt-name">Streak rescue</div><div class="opt-desc">Complete all habits twice today to restore your streak.</div></div>
+          </div>
+          <div class="opt-badge badge-avail" id="rescueBadge">1 left</div>
+        </div>
+        <div class="tokens-row" id="rescueTokens">
+          <div class="token t-green">⚡</div>
+          <div class="token-lbl">1 lifetime rescue remaining</div>
+        </div>
+        <div id="rescueProgress" style="display:none;margin-bottom:10px;">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Rescue progress — complete all habits twice today</div>
+          <div style="background:var(--card2);border-radius:6px;height:8px;overflow:hidden;">
+            <div id="rescueProgressBar" style="height:100%;background:var(--green);width:0%;transition:width 0.3s;border-radius:6px;"></div>
+          </div>
+          <div style="font-size:11px;color:var(--green);margin-top:5px;" id="rescueProgressLabel">0 / 0 habits done twice</div>
+        </div>
+        <button class="action-btn btn-green" id="rescueBtn" onclick="useRescue()">Start rescue — I'll complete double habits</button>
       </div>
-      <button class="action-btn btn-green" id="rescueBtn" onclick="useRescue()">Start rescue — complete double habits today</button>
     </div>
   </div>
 
@@ -710,6 +750,9 @@ const state = {
   isPremium: false,
   notifTime: '08:00',
   streakExtendedToday: false,
+  missedYesterday: false,
+  rescueActive: false,
+  rescueHabitsDone: 0,
 };
 const FREE_HABIT_LIMIT = 3;
 
@@ -1014,6 +1057,15 @@ async function toggleHabit(id) {
   } else {
     showToast('Habit checked! Keep going 💪');
   }
+  // if rescue is active and first round done, count second round
+  if (state.rescueActive) {
+    const firstRoundDone = state.habits.every(h => h.done);
+    if (firstRoundDone) {
+      // they're working on second round now
+      state.rescueHabitsDone = state.habits.filter(h => h.done).length;
+      updateRescueProgress();
+    }
+  }
   renderHabits(); updateProgress();
   document.getElementById('streakNum').textContent=state.streakDays;
 }
@@ -1200,47 +1252,87 @@ function buildBreakdown() {
 }
 
 // ── STREAK ──
-function renderStreak() {
-  document.getElementById('riskStreakNum').textContent=state.streakDays;
-  document.getElementById('riskNum').textContent=state.streakDays;
+async function renderStreak() {
+  // check if user missed yesterday
+  const missed = await checkMissedYesterday();
+  state.missedYesterday = missed;
 
-  // contextual header message
-  const allDone = state.habits.length > 0 && state.habits.every(h => h.done);
-  const sub = document.getElementById('streakPageSub');
-  const riskSub = document.getElementById('riskSubText');
-  if (allDone) {
-    if (sub) sub.textContent = 'All habits done today — streak is safe!';
-    if (riskSub) riskSub.textContent = 'Keep it up. Use a freeze or rescue if you ever miss a day.';
-  } else if (state.streakDays === 0) {
-    if (sub) sub.textContent = 'Complete habits daily to build your streak';
-    if (riskSub) riskSub.textContent = 'Use a freeze or rescue if you ever miss a day.';
+  const safeView = document.getElementById('streakSafeView');
+  const riskView = document.getElementById('streakRiskView');
+
+  if (missed && state.streakDays > 0 && !state.freezeUsed) {
+    // AT RISK — show the rescue/freeze options
+    safeView.style.display = 'none';
+    riskView.style.display = 'block';
+    document.getElementById('streakPageSub').textContent = 'Your streak is at risk — act now!';
+    document.getElementById('riskStreakNum2').textContent = state.streakDays;
+    document.getElementById('riskNum2').textContent = state.streakDays;
+
+    // freeze badge
+    const freezesLeft = state.freezeUsed ? 0 : 1;
+    document.getElementById('freezeBadge').className = freezesLeft > 0 ? 'opt-badge badge-avail' : 'opt-badge badge-used';
+    document.getElementById('freezeBadge').textContent = state.isPremium ? '3/month' : (freezesLeft + ' left');
+    document.getElementById('freezeTokens').innerHTML = freezesLeft > 0
+      ? '<div class="token t-amber">❄️</div><div class="token-lbl">' + (state.isPremium ? '3 freezes per month' : '1 lifetime freeze remaining') + '</div>'
+      : '<div class="token t-spent">✓</div><div class="token-lbl">No freezes left — upgrade for more</div>';
+
+    if (state.freezeUsed) markFreezeUsed();
+
+    // rescue badge
+    const rescuesLeft = state.rescueUsed ? 0 : 1;
+    document.getElementById('rescueBadge').className = rescuesLeft > 0 ? 'opt-badge badge-avail' : 'opt-badge badge-used';
+    document.getElementById('rescueBadge').textContent = state.isPremium ? 'Unlimited' : (rescuesLeft + ' left');
+    document.getElementById('rescueTokens').innerHTML = rescuesLeft > 0
+      ? '<div class="token t-green">⚡</div><div class="token-lbl">' + (state.isPremium ? 'Unlimited rescues' : '1 lifetime rescue remaining') + '</div>'
+      : '<div class="token t-spent">⚡</div><div class="token-lbl">No rescues left — upgrade for more</div>';
+
+    if (state.rescueUsed) markRescueUsed();
+
+    // if rescue is active, show progress
+    if (state.rescueActive) updateRescueProgress();
+
   } else {
-    if (sub) sub.textContent = 'Use a freeze or rescue if you miss a day';
-    if (riskSub) riskSub.textContent = 'Miss one day without protection and your streak resets to zero.';
-  }
+    // SAFE — show safe view
+    safeView.style.display = 'block';
+    riskView.style.display = 'none';
+    document.getElementById('riskStreakNum').textContent = state.streakDays;
+    document.getElementById('riskNum').textContent = state.streakDays;
 
-  // show freeze/rescue availability
-  if (state.isPremium) {
-    // premium — show monthly allowance
-    document.getElementById('freezeBadge').className='opt-badge badge-avail';
-    document.getElementById('freezeBadge').textContent='3/month';
-    document.getElementById('rescueBadge').className='opt-badge badge-avail';
-    document.getElementById('rescueBadge').textContent='Unlimited';
-    if (!state.freezeUsed) {
-      document.getElementById('freezeBtn').className='action-btn btn-amber';
-      document.getElementById('freezeBtn').textContent='Use freeze — save my streak';
-      document.getElementById('freezeCard').classList.remove('used');
+    const allDone = state.habits.length > 0 && state.habits.every(h => h.done);
+    const sub = document.getElementById('streakPageSub');
+    const riskSub = document.getElementById('riskSubText');
+    if (state.streakDays === 0) {
+      if (sub) sub.textContent = 'Build your streak by completing habits daily';
+      if (riskSub) riskSub.textContent = 'Check off all habits every day to grow your streak.';
+    } else if (allDone) {
+      if (sub) sub.textContent = 'All done today — streak is safe! 🎉';
+      if (riskSub) riskSub.textContent = 'Great work! Come back tomorrow to keep it going.';
+    } else {
+      if (sub) sub.textContent = 'Complete today\'s habits to protect your streak';
+      if (riskSub) riskSub.textContent = 'Finish your habits before midnight to keep your streak alive.';
     }
-    if (!state.rescueUsed) {
-      document.getElementById('rescueBtn').className='action-btn btn-green';
-      document.getElementById('rescueBtn').textContent='Start rescue — complete double habits today';
-      document.getElementById('rescueCard').classList.remove('used');
-    }
-  }
 
-  // restore used state from DB
-  if (state.freezeUsed) markFreezeUsed();
-  if (state.rescueUsed) markRescueUsed();
+    // update freeze/rescue counts in safe view
+    const safeFreezesLeft = document.getElementById('safeFreezesLeft');
+    const safeRescuesLeft = document.getElementById('safeRescuesLeft');
+    if (safeFreezesLeft) safeFreezesLeft.textContent = state.isPremium ? '3/mo' : (state.freezeUsed ? '0' : '1');
+    if (safeRescuesLeft) safeRescuesLeft.textContent = state.isPremium ? '∞' : (state.rescueUsed ? '0' : '1');
+  }
+}
+
+async function checkMissedYesterday() {
+  if (!state.userId || state.habits.length === 0) return false;
+  try {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yDate = yesterday.toISOString().split('T')[0];
+    const { data: logs } = await sb.from('habit_logs')
+      .select('habit_id')
+      .eq('user_id', state.userId)
+      .eq('done_at', yDate);
+    // missed if no logs at all yesterday
+    return !logs || logs.length === 0;
+  } catch(e) { return false; }
 }
 
 function markFreezeUsed() {
@@ -1267,10 +1359,23 @@ async function useFreeze() {
     return;
   }
   if (state.freezeUsed) return;
-  state.freezeUsed=true;
+  state.freezeUsed = true;
   markFreezeUsed();
+  // log yesterday as frozen so streak stays intact
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yDate = yesterday.toISOString().split('T')[0];
+  // insert a placeholder log for each habit for yesterday
+  if (state.userId && state.habits.length) {
+    try {
+      await sb.from('habit_logs').insert(
+        state.habits.map(h => ({ habit_id: h.dbId, user_id: state.userId, done_at: yDate }))
+      );
+    } catch(e) {}
+  }
   await dbSaveUser();
-  showOverlay('❄️','Streak frozen!','Your '+state.streakDays+'-day streak is safe for today. Upgrade for 3 freezes/month.');
+  showOverlay('❄️', 'Streak frozen!', 'Your ' + state.streakDays + '-day streak is safe. Upgrade for 3 freezes/month.');
+  renderStreak();
 }
 
 async function useRescue() {
