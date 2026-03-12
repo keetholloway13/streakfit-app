@@ -785,7 +785,9 @@ async function dbLoadUser(userId) {
     state.notifTime = user.notif_time || '08:00';
     state.habits = (habits||[]).map((h, i) => ({
       id: i + 1, dbId: h.id, name: h.name, icon: h.icon,
-      color: h.color, streak: h.streak || 0, meta: h.meta, done: doneIds.has(h.id),
+      color: h.color, streak: h.streak || 0, meta: h.meta,
+      done: doneIds.has(h.id),
+      streakCountedToday: doneIds.has(h.id), // already counted if logged today
     }));
     // if all habits were already done today, mark streak as already extended
     const lastExtended = user.streak_extended_date || '';
@@ -982,22 +984,30 @@ function renderHabits() {
 
 async function toggleHabit(id) {
   const h = state.habits.find(x=>x.id===id);
-  if (!h.done) {
-    h.done=true; h.streak++;
-    const allDone = state.habits.every(x=>x.done);
-    if (allDone && !state.streakExtendedToday) {
-      state.streakDays++;
-      state.streakExtendedToday = true;
-      showToast('All done! Streak extended 🔥');
-      dbSaveUser();
-    } else if (allDone && state.streakExtendedToday) {
-      showToast('All habits done today 💪');
-    } else {
-      showToast('Habit checked! Keep going 💪');
-    }
-    // save to DB in background
-    dbLogHabit(h.dbId);
+  // if already logged today, don't do anything
+  if (h.done) {
+    showToast('Already done today! Come back tomorrow 👊');
+    return;
+  }
+  h.done = true;
+  // only increment habit streak if not already incremented today
+  if (!h.streakCountedToday) {
+    h.streak++;
+    h.streakCountedToday = true;
     dbUpdateHabitStreak(h.dbId, h.streak);
+  }
+  dbLogHabit(h.dbId);
+
+  const allDone = state.habits.every(x=>x.done);
+  if (allDone && !state.streakExtendedToday) {
+    state.streakDays++;
+    state.streakExtendedToday = true;
+    showToast('All done! Streak extended 🔥');
+    dbSaveUser();
+  } else if (allDone && state.streakExtendedToday) {
+    showToast('All habits done today 💪');
+  } else {
+    showToast('Habit checked! Keep going 💪');
   }
   renderHabits(); updateProgress();
   document.getElementById('streakNum').textContent=state.streakDays;
