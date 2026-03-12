@@ -709,6 +709,7 @@ const state = {
   rescueUsed: false,
   isPremium: false,
   notifTime: '08:00',
+  streakExtendedToday: false,
 };
 const FREE_HABIT_LIMIT = 3;
 
@@ -716,6 +717,7 @@ const FREE_HABIT_LIMIT = 3;
 async function dbSaveUser() {
   try {
     if (state.userId) {
+      const todayDate = new Date().toISOString().split('T')[0];
       await sb.from('users').update({
         name: state.name,
         streak_days: state.streakDays,
@@ -723,6 +725,7 @@ async function dbSaveUser() {
         rescue_used: state.rescueUsed,
         is_premium: state.isPremium,
         notif_time: state.notifTime,
+        streak_extended_date: state.streakExtendedToday ? todayDate : null,
       }).eq('id', state.userId);
     } else {
       const { data, error } = await sb.from('users').insert({
@@ -784,6 +787,9 @@ async function dbLoadUser(userId) {
       id: i + 1, dbId: h.id, name: h.name, icon: h.icon,
       color: h.color, streak: h.streak || 0, meta: h.meta, done: doneIds.has(h.id),
     }));
+    // if all habits were already done today, mark streak as already extended
+    const lastExtended = user.streak_extended_date || '';
+    state.streakExtendedToday = lastExtended === today;
     return true;
   } catch(e) { console.warn('dbLoadUser:', e); return false; }
 }
@@ -979,12 +985,19 @@ async function toggleHabit(id) {
   if (!h.done) {
     h.done=true; h.streak++;
     const allDone = state.habits.every(x=>x.done);
-    if (allDone) { state.streakDays++; showToast('All done! Streak extended 🔥'); }
-    else showToast('Habit checked! Keep going 💪');
+    if (allDone && !state.streakExtendedToday) {
+      state.streakDays++;
+      state.streakExtendedToday = true;
+      showToast('All done! Streak extended 🔥');
+      dbSaveUser();
+    } else if (allDone && state.streakExtendedToday) {
+      showToast('All habits done today 💪');
+    } else {
+      showToast('Habit checked! Keep going 💪');
+    }
     // save to DB in background
     dbLogHabit(h.dbId);
     dbUpdateHabitStreak(h.dbId, h.streak);
-    if (allDone) dbSaveUser();
   }
   renderHabits(); updateProgress();
   document.getElementById('streakNum').textContent=state.streakDays;
