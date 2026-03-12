@@ -456,7 +456,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
     <div style="margin-top:14px;" class="stats-row">
       <div class="stat-card"><div class="stat-val v-purple" id="pStreakNum">0</div><div class="stat-lbl">🔥 streak</div></div>
       <div class="stat-card"><div class="stat-val v-green" id="progressPct">0%</div><div class="stat-lbl">completion</div></div>
-      <div class="stat-card"><div class="stat-val">19</div><div class="stat-lbl">days done</div></div>
+      <div class="stat-card"><div class="stat-val" id="statDaysDone">0</div><div class="stat-lbl">days done</div></div>
       <div class="stat-card"><div class="stat-val" id="pHabitCount">0</div><div class="stat-lbl">habits</div></div>
     </div>
   </div>
@@ -495,15 +495,15 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
 ══════════════════════════════════════ -->
 <div class="page" id="page-streak">
   <div class="page-header">
-    <div class="page-title">Protect your streak</div>
-    <div class="page-sub">You missed yesterday — act now before it resets</div>
+    <div class="page-title">Streak shield</div>
+    <div class="page-sub" id="streakPageSub">Your streak protection tools</div>
   </div>
 
   <div class="risk-banner">
     <div style="font-size:34px;">🔥</div>
     <div style="flex:1;">
-      <div class="risk-title"><span id="riskStreakNum">0</span>-day streak at risk</div>
-      <div class="risk-sub">Miss one more day and it resets to zero.</div>
+      <div class="risk-title"><span id="riskStreakNum">0</span>-day streak</div>
+      <div class="risk-sub" id="riskSubText">Use a freeze or rescue if you ever miss a day.</div>
     </div>
     <div class="risk-num" id="riskNum">0</div>
   </div>
@@ -1000,12 +1000,27 @@ function updateProgress() {
 }
 
 // ── PROGRESS ──
-function renderProgress() {
+async function renderProgress() {
   document.getElementById('pStreakNum').textContent=state.streakDays;
   document.getElementById('pHabitCount').textContent=state.habits.length;
+  // calculate real days done this month from DB
+  if (state.userId) {
+    try {
+      const now = new Date();
+      const monthStart = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+      const today = now.toISOString().split('T')[0];
+      const { data: logs } = await sb.from('habit_logs')
+        .select('done_at')
+        .eq('user_id', state.userId)
+        .gte('done_at', monthStart)
+        .lte('done_at', today);
+      const uniqueDays = new Set((logs||[]).map(l => l.done_at));
+      document.getElementById('statDaysDone').textContent = uniqueDays.size;
+    } catch(e) { document.getElementById('statDaysDone').textContent = 0; }
+  } else {
+    document.getElementById('statDaysDone').textContent = 0;
+  }
   buildCalendar(); buildWeekBars(); buildBreakdown();
-  // also update home month % in background
-  buildCalendar();
 }
 
 async function buildCalendar() {
@@ -1127,6 +1142,41 @@ function buildBreakdown() {
 function renderStreak() {
   document.getElementById('riskStreakNum').textContent=state.streakDays;
   document.getElementById('riskNum').textContent=state.streakDays;
+
+  // contextual header message
+  const allDone = state.habits.length > 0 && state.habits.every(h => h.done);
+  const sub = document.getElementById('streakPageSub');
+  const riskSub = document.getElementById('riskSubText');
+  if (allDone) {
+    if (sub) sub.textContent = 'All habits done today — streak is safe!';
+    if (riskSub) riskSub.textContent = 'Keep it up. Use a freeze or rescue if you ever miss a day.';
+  } else if (state.streakDays === 0) {
+    if (sub) sub.textContent = 'Complete habits daily to build your streak';
+    if (riskSub) riskSub.textContent = 'Use a freeze or rescue if you ever miss a day.';
+  } else {
+    if (sub) sub.textContent = 'Use a freeze or rescue if you miss a day';
+    if (riskSub) riskSub.textContent = 'Miss one day without protection and your streak resets to zero.';
+  }
+
+  // show freeze/rescue availability
+  if (state.isPremium) {
+    // premium — show monthly allowance
+    document.getElementById('freezeBadge').className='opt-badge badge-avail';
+    document.getElementById('freezeBadge').textContent='3/month';
+    document.getElementById('rescueBadge').className='opt-badge badge-avail';
+    document.getElementById('rescueBadge').textContent='Unlimited';
+    if (!state.freezeUsed) {
+      document.getElementById('freezeBtn').className='action-btn btn-amber';
+      document.getElementById('freezeBtn').textContent='Use freeze — save my streak';
+      document.getElementById('freezeCard').classList.remove('used');
+    }
+    if (!state.rescueUsed) {
+      document.getElementById('rescueBtn').className='action-btn btn-green';
+      document.getElementById('rescueBtn').textContent='Start rescue — complete double habits today';
+      document.getElementById('rescueCard').classList.remove('used');
+    }
+  }
+
   // restore used state from DB
   if (state.freezeUsed) markFreezeUsed();
   if (state.rescueUsed) markRescueUsed();
