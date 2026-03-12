@@ -555,7 +555,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
         <div class="feature-row"><div class="feat-icon" style="background:var(--green-bg)">📊</div><span>Detailed analytics</span><div class="feat-compare"><strong>Premium only</strong></div></div>
       </div>
       <button class="upsell-btn" id="upgradeBtn" onclick="startUpgrade()">Start 7-day free trial</button>
-      <div class="upsell-fine">Cancel anytime · $2.99/month or $19.99/year (save 44%)</div>
+      <div class="upsell-fine">Cancel anytime · $2.99/month</div>
     </div>
   </div>
 
@@ -1124,17 +1124,50 @@ function calClick(d,s,count,total){
   showToast(`${monthName} ${d} — ${msg}`);
 }
 
-function buildWeekBars() {
-  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const vals=[4,4,2,4,4,3,0]; const todayIdx=3; const maxVal=Math.max(...vals,1);
-  document.getElementById('weekBars').innerHTML=days.map((d,i)=>{
-    const isFuture=i>todayIdx; const isToday=i===todayIdx;
-    const h=isFuture?3:Math.max(4,Math.round((vals[i]/maxVal)*68));
-    const bg=isToday?'var(--purple)':isFuture?'rgba(255,255,255,0.05)':'rgba(124,111,247,0.32)';
+async function buildWeekBars() {
+  const dayLabels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const now = new Date();
+  const todayDow = now.getDay(); // 0=Sun,1=Mon...6=Sat
+  // convert to Mon-first index (0=Mon, 6=Sun)
+  const todayIdx = todayDow === 0 ? 6 : todayDow - 1;
+  const totalHabits = state.habits.length || 1;
+
+  // Get dates for this week Mon-Sun
+  const weekDates = dayLabels.map((_, i) => {
+    const d = new Date(now);
+    d.setDate(now.getDate() - todayIdx + i);
+    return d.toISOString().split('T')[0];
+  });
+
+  // Fetch logs for this week from Supabase
+  let logsMap = {};
+  if (state.userId) {
+    try {
+      const { data: logs } = await sb.from('habit_logs')
+        .select('done_at')
+        .eq('user_id', state.userId)
+        .gte('done_at', weekDates[0])
+        .lte('done_at', weekDates[6]);
+      (logs||[]).forEach(l => {
+        logsMap[l.done_at] = (logsMap[l.done_at] || 0) + 1;
+      });
+    } catch(e) { console.warn('weekBars:', e); }
+  }
+
+  const vals = weekDates.map(d => logsMap[d] || 0);
+  const maxVal = Math.max(...vals, 1);
+
+  document.getElementById('weekBars').innerHTML = dayLabels.map((d, i) => {
+    const isFuture = i > todayIdx;
+    const isToday = i === todayIdx;
+    const pct = isFuture ? 0 : vals[i] / totalHabits;
+    const h = isFuture ? 3 : Math.max(pct > 0 ? 8 : 3, Math.round(pct * 68));
+    const bg = isToday ? 'var(--purple)' : isFuture ? 'rgba(255,255,255,0.05)' : pct >= 1 ? 'rgba(124,111,247,0.7)' : pct > 0 ? 'rgba(124,111,247,0.35)' : 'rgba(255,255,255,0.05)';
     return `<div class="bar-col"><div class="bar-body" style="height:${h}px;background:${bg};"></div></div>`;
   }).join('');
-  document.getElementById('weekLabels').innerHTML=days.map((d,i)=>{
-    const isToday=i===3;
+
+  document.getElementById('weekLabels').innerHTML = dayLabels.map((d, i) => {
+    const isToday = i === todayIdx;
     return `<div style="flex:1;text-align:center;font-size:10px;font-weight:${isToday?'600':'400'};color:${isToday?'var(--purple-light)':'var(--muted)'};">${d}</div>`;
   }).join('');
 }
