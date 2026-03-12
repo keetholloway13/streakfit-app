@@ -306,6 +306,9 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
 .spinner { width:36px; height:36px; border-radius:50%; border:3px solid var(--purple-bg); border-top-color:var(--purple); animation:spin 0.8s linear infinite; }
 @keyframes spin { to { transform:rotate(360deg); } }
 .loading-msg { font-size:14px; color:var(--muted); }
+/* ── ICON PICKER ── */
+.icon-opt { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer; border:1.5px solid var(--border); background:var(--card2); transition:all 0.15s; }
+.icon-opt.selected { border-color:var(--purple); background:var(--purple-bg); }
 </style>
 </head>
 <body>
@@ -424,7 +427,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
         <div class="stat-mini"><div class="stat-mini-num" id="doneCount">0/0</div><div class="stat-mini-lbl">Done today</div></div>
-        <div class="stat-mini"><div class="stat-mini-num" style="color:var(--purple);">86%</div><div class="stat-mini-lbl">This month</div></div>
+        <div class="stat-mini"><div class="stat-mini-num" style="color:var(--purple);" id="monthPct">0%</div><div class="stat-mini-lbl">This month</div></div>
       </div>
     </div>
   </div>
@@ -437,7 +440,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
   <div class="section">
     <div class="section-header">
       <span class="section-title">Habits</span>
-      <span class="section-action" onclick="showToast('Add habit coming soon!')">+ Add</span>
+      <span class="section-action" onclick="openAddHabit()">+ Add</span>
     </div>
     <div class="habit-list" id="habitList"></div>
   </div>
@@ -452,7 +455,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
     <div class="page-title">Your progress</div>
     <div style="margin-top:14px;" class="stats-row">
       <div class="stat-card"><div class="stat-val v-purple" id="pStreakNum">0</div><div class="stat-lbl">🔥 streak</div></div>
-      <div class="stat-card"><div class="stat-val v-green">86%</div><div class="stat-lbl">completion</div></div>
+      <div class="stat-card"><div class="stat-val v-green" id="progressPct">0%</div><div class="stat-lbl">completion</div></div>
       <div class="stat-card"><div class="stat-val">19</div><div class="stat-lbl">days done</div></div>
       <div class="stat-card"><div class="stat-val" id="pHabitCount">0</div><div class="stat-lbl">habits</div></div>
     </div>
@@ -461,7 +464,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
   <div class="section">
     <div class="section-header"><span class="section-title">Monthly view</span></div>
     <div class="cal-wrap">
-      <div class="cal-head">March 2026 <span>86% complete</span></div>
+      <div class="cal-head" id="calHead">Loading... <span id="calPct"></span></div>
       <div class="cal-days-hdr"><div class="cal-day-lbl">M</div><div class="cal-day-lbl">T</div><div class="cal-day-lbl">W</div><div class="cal-day-lbl">T</div><div class="cal-day-lbl">F</div><div class="cal-day-lbl">S</div><div class="cal-day-lbl">S</div></div>
       <div class="cal-grid" id="calGrid"></div>
       <div class="legend">
@@ -559,6 +562,109 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
 </div>
 
 
+<!-- ══════════════════════════════════════
+     PROFILE
+══════════════════════════════════════ -->
+<div class="page" id="page-profile">
+  <div class="page-header">
+    <div class="page-title">Profile</div>
+  </div>
+
+  <div class="section" style="margin-top:20px;">
+    <div class="section-title" style="margin-bottom:12px;">Account</div>
+    <div class="card" style="padding:16px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--purple-bg);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;" id="profileAvatar">🙂</div>
+        <div>
+          <div style="font-size:16px;font-weight:600;color:var(--text);" id="profileName">-</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Free plan</div>
+        </div>
+        <button onclick="openEditName()" style="margin-left:auto;font-size:12px;font-weight:600;color:var(--purple);background:var(--purple-bg);padding:6px 12px;border-radius:20px;border:none;cursor:pointer;font-family:inherit;">Edit</button>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:12px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);">🔥 Current streak</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;" id="profileStreak">0 days</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:13px;font-weight:600;color:var(--text);">📋 Habits</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;" id="profileHabits">0 active</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="margin-top:20px;">
+    <div class="section-title" style="margin-bottom:12px;">My habits</div>
+    <div id="profileHabitList"></div>
+    <button onclick="openAddHabit()" style="width:100%;padding:13px;border-radius:var(--radius-sm);background:var(--purple-bg);color:var(--purple-light);font-size:14px;font-weight:600;border:1.5px dashed rgba(124,111,247,0.3);cursor:pointer;font-family:inherit;margin-top:2px;">+ Add new habit</button>
+  </div>
+
+  <div class="section" style="margin-top:20px;">
+    <div class="section-title" style="margin-bottom:12px;">Premium</div>
+    <div class="card" style="padding:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);">StreakFit Premium</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Unlock all features</div>
+        </div>
+        <div style="font-size:16px;font-weight:600;color:var(--purple);">$2.99/mo</div>
+      </div>
+      <button onclick="startUpgrade()" style="width:100%;padding:12px;border-radius:10px;background:var(--purple);color:#EEEEFF;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:inherit;">Upgrade to Premium</button>
+    </div>
+  </div>
+
+  <div class="section" style="margin-top:20px;margin-bottom:20px;">
+    <div class="section-title" style="margin-bottom:12px;">Settings</div>
+    <div class="card" style="overflow:hidden;">
+      <div onclick="confirmReset()" style="padding:14px 16px;font-size:14px;color:#FF6B6B;font-weight:500;cursor:pointer;border-bottom:1px solid var(--border);">Reset all data</div>
+      <div onclick="showToast('Version 1.0.0 — Built with StreakFit')" style="padding:14px 16px;font-size:14px;color:var(--muted);cursor:pointer;">About StreakFit v1.0</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     HABIT MODAL (add/edit)
+══════════════════════════════════════ -->
+<div class="overlay" id="habitModal">
+  <div class="overlay-card" style="max-width:340px;text-align:left;">
+    <div style="font-size:17px;font-weight:600;color:var(--text);margin-bottom:16px;" id="habitModalTitle">Add habit</div>
+
+    <div style="margin-bottom:14px;">
+      <div class="input-label" style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:7px;">Habit name</div>
+      <input id="habitNameInput" class="text-input" placeholder="e.g. Morning run" maxlength="30" style="width:100%;"/>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <div class="input-label" style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:7px;">Icon</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;" id="iconPicker">
+        <div class="icon-opt selected" data-icon="💪" onclick="selectIcon(this)">💪</div>
+        <div class="icon-opt" data-icon="🏃" onclick="selectIcon(this)">🏃</div>
+        <div class="icon-opt" data-icon="💧" onclick="selectIcon(this)">💧</div>
+        <div class="icon-opt" data-icon="🧘" onclick="selectIcon(this)">🧘</div>
+        <div class="icon-opt" data-icon="📚" onclick="selectIcon(this)">📚</div>
+        <div class="icon-opt" data-icon="😴" onclick="selectIcon(this)">😴</div>
+        <div class="icon-opt" data-icon="🥗" onclick="selectIcon(this)">🥗</div>
+        <div class="icon-opt" data-icon="🎯" onclick="selectIcon(this)">🎯</div>
+        <div class="icon-opt" data-icon="✨" onclick="selectIcon(this)">✨</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <div class="input-label" style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:7px;">Note (optional)</div>
+      <input id="habitMetaInput" class="text-input" placeholder="e.g. 30 min · Every day" maxlength="40" style="width:100%;"/>
+    </div>
+
+    <div style="display:flex;gap:10px;">
+      <button onclick="closeHabitModal()" style="flex:1;padding:12px;border-radius:10px;background:var(--card2);color:var(--muted);font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:inherit;">Cancel</button>
+      <button onclick="saveHabit()" style="flex:2;padding:12px;border-radius:10px;background:var(--purple);color:#EEEEFF;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:inherit;" id="habitSaveBtn">Save habit</button>
+    </div>
+    <div id="habitDeleteRow" style="display:none;margin-top:10px;">
+      <button onclick="deleteHabit()" style="width:100%;padding:11px;border-radius:10px;background:rgba(255,107,107,0.1);color:#FF6B6B;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;">Delete this habit</button>
+    </div>
+  </div>
+</div>
+
 <!-- SHARED NAV -->
 <div class="bottom-nav" id="sharedNav" style="display:none;">
   <div class="nav-btn" id="nav-home" onclick="navigate('home')">
@@ -568,6 +674,10 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
   <div class="nav-btn" id="nav-progress" onclick="navigate('progress')">
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><polyline points="2,18 7,10 12,14 18,5" stroke="#6666AA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="nav-progress-icon"/></svg>
     <span class="nav-label" id="nav-progress-label">Progress</span>
+  </div>
+  <div class="nav-btn" id="nav-profile" onclick="navigate('profile')">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="8" r="4" stroke="#6666AA" stroke-width="2" id="nav-profile-icon1"/><path d="M3 20 Q11 16 19 20" stroke="#6666AA" stroke-width="2" stroke-linecap="round" id="nav-profile-icon2"/></svg>
+    <span class="nav-label" id="nav-profile-label">Profile</span>
   </div>
   <div class="nav-btn" id="nav-streak" onclick="navigate('streak')">
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2 L13.5 8.5 L20.5 9 L15.5 13.5 L17 20.5 L11 17 L5 20.5 L6.5 13.5 L1.5 9 L8.5 8.5 Z" stroke="#6666AA" stroke-width="1.8" fill="none" stroke-linejoin="round" id="nav-streak-icon"/></svg>
@@ -597,7 +707,10 @@ const state = {
   habits: [],
   freezeUsed: false,
   rescueUsed: false,
+  isPremium: false,
+  notifTime: '08:00',
 };
+const FREE_HABIT_LIMIT = 3;
 
 // ── DB HELPERS ──
 async function dbSaveUser() {
@@ -608,6 +721,8 @@ async function dbSaveUser() {
         streak_days: state.streakDays,
         freeze_used: state.freezeUsed,
         rescue_used: state.rescueUsed,
+        is_premium: state.isPremium,
+        notif_time: state.notifTime,
       }).eq('id', state.userId);
     } else {
       const { data, error } = await sb.from('users').insert({
@@ -663,6 +778,8 @@ async function dbLoadUser(userId) {
     state.streakDays = user.streak_days || 0;
     state.freezeUsed = user.freeze_used;
     state.rescueUsed = user.rescue_used;
+    state.isPremium = user.is_premium || false;
+    state.notifTime = user.notif_time || '08:00';
     state.habits = (habits||[]).map((h, i) => ({
       id: i + 1, dbId: h.id, name: h.name, icon: h.icon,
       color: h.color, streak: h.streak || 0, meta: h.meta, done: doneIds.has(h.id),
@@ -794,15 +911,16 @@ function navigate(page) {
   });
   currentPage = page;
   updateNav(page);
-  if (page==='home') renderHome();
+  if (page==='home') { renderHome(); buildCalendar(); }
   if (page==='progress') renderProgress();
   if (page==='streak') renderStreak();
+  if (page==='profile') renderProfile();
 }
 
 function updateNav(page) {
   const nav = document.getElementById('sharedNav');
-  const pages = ['home','progress','streak'];
-  const showNav = pages.includes(page);
+  const pages = ['home','progress','streak','profile'];
+  const showNav = pages.includes(page) && page !== 'onboarding';
   nav.style.display = showNav ? 'flex' : 'none';
   pages.forEach(p => {
     const btn = document.getElementById('nav-'+p);
@@ -813,6 +931,10 @@ function updateNav(page) {
   });
   // update icon colors
   const purple = '#7C6FF7', gray = '#6666AA';
+  const pi2 = document.getElementById('nav-profile-icon1');
+  const pi3 = document.getElementById('nav-profile-icon2');
+  if (pi2) pi2.setAttribute('stroke', page==='profile' ? purple : gray);
+  if (pi3) pi3.setAttribute('stroke', page==='profile' ? purple : gray);
   ['1','2','3','4'].forEach(n => {
     const el = document.getElementById('nav-home-icon'+n);
     if (el) el.setAttribute('fill', page==='home' ? (n==='4'?'#A29BFE':purple) : gray);
@@ -882,30 +1004,81 @@ function renderProgress() {
   document.getElementById('pStreakNum').textContent=state.streakDays;
   document.getElementById('pHabitCount').textContent=state.habits.length;
   buildCalendar(); buildWeekBars(); buildBreakdown();
+  // also update home month % in background
+  buildCalendar();
 }
 
-function buildCalendar() {
+async function buildCalendar() {
   const grid=document.getElementById('calGrid');
-  const startOffset=6; const daysInMonth=31; const today=12;
-  const statuses=[];
-  for(let i=1;i<=daysInMonth;i++){
-    if(i>today) statuses.push('future');
-    else if(i===3||i===8) statuses.push('partial');
-    else if(i===1||i===6||i===7||i===13) statuses.push('missed');
-    else statuses.push('full');
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const todayDate = now.getDate();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  // day of week for 1st (0=Sun), convert to Mon-first offset
+  const firstDay = new Date(year, month, 1).getDay();
+  const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+  const monthName = now.toLocaleString('default', { month: 'long' });
+  const totalHabits = state.habits.length || 1;
+
+  // Fetch all logs for this month from Supabase
+  let logsMap = {}; // { 'YYYY-MM-DD': count }
+  if (state.userId) {
+    const monthStart = `${year}-${String(month+1).padStart(2,'0')}-01`;
+    const monthEnd = `${year}-${String(month+1).padStart(2,'0')}-${String(daysInMonth).padStart(2,'0')}`;
+    try {
+      const { data: logs } = await sb.from('habit_logs')
+        .select('done_at')
+        .eq('user_id', state.userId)
+        .gte('done_at', monthStart)
+        .lte('done_at', monthEnd);
+      (logs||[]).forEach(l => {
+        logsMap[l.done_at] = (logsMap[l.done_at] || 0) + 1;
+      });
+    } catch(e) { console.warn('calendar logs:', e); }
   }
+
+  // Calculate completion %
+  let fullDays = 0, partialDays = 0, pastDays = 0;
+  for (let d = 1; d <= todayDate; d++) {
+    const key = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const count = logsMap[key] || 0;
+    if (count >= totalHabits) fullDays++;
+    else if (count > 0) partialDays++;
+    pastDays++;
+  }
+  const pct = pastDays > 0 ? Math.round((fullDays / pastDays) * 100) : 0;
+
+  // Update all percentage displays
+  const pctStr = pct + '%';
+  ['monthPct','progressPct'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = pctStr;
+  });
+  const calHead = document.getElementById('calHead');
+  if (calHead) calHead.innerHTML = `${monthName} ${year} <span id="calPct">${pct}% complete</span>`;
+
+  // Build grid
   let html='';
   for(let i=0;i<startOffset;i++) html+='<div class="cal-cell empty"></div>';
   for(let d=1;d<=daysInMonth;d++){
-    const s=statuses[d-1];
-    html+=`<div class="cal-cell ${s} ${d===today?'today':''}" onclick="calClick(${d},'${s}')"></div>`;
+    const key = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const count = logsMap[key] || 0;
+    let s;
+    if (d > todayDate) s = 'future';
+    else if (count >= totalHabits) s = 'full';
+    else if (count > 0) s = 'partial';
+    else s = 'missed';
+    html+=`<div class="cal-cell ${s} ${d===todayDate?'today':''}" onclick="calClick(${d},'${s}',${count},${totalHabits})"></div>`;
   }
   grid.innerHTML=html;
 }
 
-function calClick(d,s){
-  const msg=s==='full'?'All habits done':s==='partial'?'Some habits done':s==='missed'?'No habits done':'Upcoming';
-  showToast(`Mar ${d} — ${msg}`);
+function calClick(d,s,count,total){
+  const now = new Date();
+  const monthName = now.toLocaleString('default', { month: 'short' });
+  const msg = s==='full' ? `All ${total} habits done` : s==='partial' ? `${count}/${total} habits done` : s==='missed' ? 'No habits done' : 'Upcoming';
+  showToast(`${monthName} ${d} — ${msg}`);
 }
 
 function buildWeekBars() {
@@ -978,6 +1151,10 @@ function markRescueUsed() {
 }
 
 async function useFreeze() {
+  if (state.freezeUsed && !state.isPremium) {
+    showOverlay('🔒', 'No freezes left', 'Free users get 1 lifetime freeze. Upgrade to Premium for 3 freezes every month.');
+    return;
+  }
   if (state.freezeUsed) return;
   state.freezeUsed=true;
   markFreezeUsed();
@@ -986,6 +1163,10 @@ async function useFreeze() {
 }
 
 async function useRescue() {
+  if (state.rescueUsed && !state.isPremium) {
+    showOverlay('🔒', 'No rescues left', 'Free users get 1 lifetime rescue. Upgrade to Premium for unlimited rescues every month.');
+    return;
+  }
   if (state.rescueUsed) return;
   state.rescueUsed=true;
   markRescueUsed();
@@ -1007,6 +1188,224 @@ function showOverlay(icon,title,sub) {
 }
 
 function closeOverlay() { document.getElementById('overlay').classList.remove('show'); }
+
+
+// ── HABIT MODAL ──
+let editingHabitId = null;
+let selectedIcon = '💪';
+
+function openAddHabit() {
+  if (!state.isPremium && state.habits.length >= FREE_HABIT_LIMIT) {
+    showOverlay('🔒', 'Premium required', `Free users can track up to ${FREE_HABIT_LIMIT} habits. Upgrade to Premium for unlimited habits.`);
+    return;
+  }
+  editingHabitId = null;
+  selectedIcon = '💪';
+  document.getElementById('habitModalTitle').textContent = 'Add habit';
+  document.getElementById('habitNameInput').value = '';
+  document.getElementById('habitMetaInput').value = '';
+  document.getElementById('habitSaveBtn').textContent = 'Save habit';
+  document.getElementById('habitDeleteRow').style.display = 'none';
+  document.querySelectorAll('.icon-opt').forEach(el => el.classList.toggle('selected', el.dataset.icon === '💪'));
+  document.getElementById('habitModal').classList.add('show');
+}
+
+function openEditHabit(id) {
+  const h = state.habits.find(x => x.id === id);
+  if (!h) return;
+  editingHabitId = id;
+  selectedIcon = h.icon;
+  document.getElementById('habitModalTitle').textContent = 'Edit habit';
+  document.getElementById('habitNameInput').value = h.name;
+  document.getElementById('habitMetaInput').value = h.meta || '';
+  document.getElementById('habitSaveBtn').textContent = 'Save changes';
+  document.getElementById('habitDeleteRow').style.display = 'block';
+  document.querySelectorAll('.icon-opt').forEach(el => el.classList.toggle('selected', el.dataset.icon === h.icon));
+  document.getElementById('habitModal').classList.add('show');
+}
+
+function closeHabitModal() {
+  document.getElementById('habitModal').classList.remove('show');
+  editingHabitId = null;
+}
+
+function selectIcon(el) {
+  selectedIcon = el.dataset.icon;
+  document.querySelectorAll('.icon-opt').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+const ICON_COLORS = {'💪':'hi-purple','🏃':'hi-green','💧':'hi-amber','🧘':'hi-red','📚':'hi-purple','😴':'hi-star','🥗':'hi-green','🎯':'hi-amber','✨':'hi-star'};
+
+async function saveHabit() {
+  const name = document.getElementById('habitNameInput').value.trim();
+  if (!name) { showToast('Please enter a habit name'); return; }
+  const meta = document.getElementById('habitMetaInput').value.trim() || 'Every day';
+  const color = ICON_COLORS[selectedIcon] || 'hi-star';
+
+  if (editingHabitId) {
+    const h = state.habits.find(x => x.id === editingHabitId);
+    if (h) { h.name = name; h.icon = selectedIcon; h.color = color; h.meta = meta; }
+  } else {
+    const newId = state.habits.length ? Math.max(...state.habits.map(h => h.id)) + 1 : 1;
+    state.habits.push({ id: newId, dbId: null, name, icon: selectedIcon, color, streak: 0, done: false, meta });
+  }
+
+  closeHabitModal();
+  showLoading('Saving...');
+  await dbSaveHabits();
+  hideLoading();
+  showToast(editingHabitId ? 'Habit updated!' : 'Habit added! 🎯');
+  renderHabits();
+  updateProgress();
+  renderProfileHabits();
+}
+
+async function deleteHabit() {
+  if (!editingHabitId) return;
+  state.habits = state.habits.filter(h => h.id !== editingHabitId);
+  closeHabitModal();
+  showLoading('Deleting...');
+  await dbSaveHabits();
+  hideLoading();
+  showToast('Habit deleted');
+  renderHabits();
+  updateProgress();
+  renderProfileHabits();
+}
+
+// ── PROFILE ──
+function renderProfile() {
+  document.getElementById('profileName').textContent = state.name || 'User';
+  document.getElementById('profileStreak').textContent = state.streakDays + ' days';
+  document.getElementById('profileHabits').textContent = state.habits.length + ' active';
+  // update plan label
+  const planEl = document.querySelector('#page-profile .card div div:nth-child(2)');
+  if (planEl) planEl.textContent = state.isPremium ? '⭐ Premium' : 'Free plan';
+  // update notif time input
+  const ti = document.getElementById('notifTimeInput');
+  if (ti) ti.value = state.notifTime || '08:00';
+  renderNotifStatus();
+  renderProfileHabits();
+}
+
+function renderProfileHabits() {
+  const container = document.getElementById('profileHabitList');
+  if (!container) return;
+  if (!state.habits.length) {
+    container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">No habits yet — add one below</div>';
+    return;
+  }
+  container.innerHTML = state.habits.map(h => `
+    <div style="background:var(--card);border-radius:var(--radius-sm);border:1px solid var(--border);padding:13px 14px;display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+      <div class="habit-icon-wrap ${h.color}" style="flex-shrink:0;">${h.icon}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:600;color:var(--text);">${h.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${h.meta || 'Every day'} · 🔥 ${h.streak} streak</div>
+      </div>
+      <button onclick="openEditHabit(${h.id})" style="font-size:12px;font-weight:600;color:var(--purple);background:var(--purple-bg);padding:5px 12px;border-radius:20px;border:none;cursor:pointer;font-family:inherit;flex-shrink:0;">Edit</button>
+    </div>`).join('');
+}
+
+function openEditName() {
+  const newName = prompt('Enter your name:', state.name);
+  if (newName && newName.trim()) {
+    state.name = newName.trim();
+    document.getElementById('userName').textContent = state.name;
+    document.getElementById('profileName').textContent = state.name;
+    dbSaveUser();
+    showToast('Name updated!');
+  }
+}
+
+
+// ── PUSH NOTIFICATIONS ──
+async function requestNotifPermission() {
+  if (!('Notification' in window)) {
+    showToast('Notifications not supported on this browser');
+    return false;
+  }
+  if (Notification.permission === 'granted') return true;
+  const perm = await Notification.requestPermission();
+  return perm === 'granted';
+}
+
+async function scheduleNotification() {
+  const granted = await requestNotifPermission();
+  if (!granted) {
+    showToast('Please allow notifications in your browser settings');
+    return;
+  }
+  const timeInput = document.getElementById('notifTimeInput');
+  if (timeInput) state.notifTime = timeInput.value || '08:00';
+  localStorage.setItem('sf_notif_time', state.notifTime);
+  localStorage.setItem('sf_notif_enabled', 'true');
+  dbSaveUser();
+  showToast('Reminder set for ' + formatTime(state.notifTime) + ' daily 🔔');
+  renderNotifStatus();
+  scheduleNextNotif();
+}
+
+function disableNotifications() {
+  localStorage.setItem('sf_notif_enabled', 'false');
+  showToast('Reminders turned off');
+  renderNotifStatus();
+}
+
+function formatTime(t) {
+  if (!t) return '8:00 AM';
+  const [h, m] = t.split(':').map(Number);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  return h12 + ':' + String(m).padStart(2,'0') + ' ' + ampm;
+}
+
+function scheduleNextNotif() {
+  const enabled = localStorage.getItem('sf_notif_enabled') === 'true';
+  if (!enabled || Notification.permission !== 'granted') return;
+  const time = state.notifTime || '08:00';
+  const [h, m] = time.split(':').map(Number);
+  const now = new Date();
+  const next = new Date();
+  next.setHours(h, m, 0, 0);
+  if (next <= now) next.setDate(next.getDate() + 1);
+  const msUntil = next - now;
+  setTimeout(() => {
+    const done = state.habits.filter(x => x.done).length;
+    const total = state.habits.length;
+    if (done < total) {
+      new Notification('StreakFit 🔥', {
+        body: `${total - done} habit${total-done>1?'s':''} left today. Don't break your ${state.streakDays}-day streak!`,
+        icon: '/favicon.ico',
+      });
+    }
+    scheduleNextNotif(); // reschedule for next day
+  }, msUntil);
+}
+
+function renderNotifStatus() {
+  const el = document.getElementById('notifStatus');
+  if (!el) return;
+  const enabled = localStorage.getItem('sf_notif_enabled') === 'true';
+  const perm = ('Notification' in window) ? Notification.permission : 'unsupported';
+  if (perm === 'unsupported') {
+    el.textContent = 'Not supported on this browser';
+    el.style.color = 'var(--muted)';
+  } else if (enabled && perm === 'granted') {
+    el.textContent = 'On · ' + formatTime(state.notifTime);
+    el.style.color = 'var(--green)';
+  } else {
+    el.textContent = 'Off';
+    el.style.color = 'var(--muted)';
+  }
+}
+
+function confirmReset() {
+  if (confirm('Reset all your data? This cannot be undone.')) {
+    localStorage.removeItem('sf_uid');
+    location.reload();
+  }
+}
 
 // ── PAYMENTS ──
 const SERVER_URL = 'https://streakfit-server.onrender.com'; // e.g. https://streakfit-server.onrender.com
@@ -1040,8 +1439,11 @@ function checkPremiumReturn() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('premium') === 'true') {
     state.isPremium = true;
-    showOverlay('🎉', 'Welcome to Premium!', 'Your 7-day free trial has started. You now have 3 freezes and unlimited rescues every month.');
-    // clean URL
+    // reset freeze/rescue counts for premium
+    state.freezeUsed = false;
+    state.rescueUsed = false;
+    dbSaveUser();
+    showOverlay('🎉', 'Welcome to Premium!', 'Your 7-day free trial has started. You now have 3 freezes/month and unlimited rescues.');
     window.history.replaceState({}, '', window.location.pathname);
   }
 }
@@ -1061,6 +1463,7 @@ async function init() {
 
 checkPremiumReturn();
 init();
+scheduleNextNotif();
 </script>
 </body>
 </html>
