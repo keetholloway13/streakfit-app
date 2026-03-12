@@ -332,74 +332,79 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
     <div class="ob-skip" id="obSkip" onclick="obNext()">Skip</div>
   </div>
 
-  <!-- Step 0: Welcome -->
+  <!-- Step 0: Welcome — EXCITEMENT FIRST -->
   <div class="ob-step ob-active" id="ob-0">
-    <div class="welcome-icon">🔥</div>
-    <div class="welcome-title">Build habits<br>that <span>actually stick</span></div>
-    <div class="welcome-sub">Track daily habits, protect your streaks, and become the person you want to be — one day at a time.</div>
-    <div class="social-proof">
-      <div class="avatars">
-        <div class="avatar">😊</div><div class="avatar">🙂</div><div class="avatar">😄</div><div class="avatar">🤩</div>
+    <div style="text-align:center;padding:20px 0 10px;">
+      <div class="ob-streak-anim" id="obStreakAnim">
+        <div style="font-size:64px;line-height:1;">🔥</div>
+        <div style="font-family:'DM Mono',monospace;font-size:72px;font-weight:500;color:var(--purple-light);line-height:1;margin-top:8px;" id="obStreakCounter">0</div>
+        <div style="font-size:12px;font-weight:600;letter-spacing:0.12em;color:var(--muted);margin-top:4px;">DAY STREAK</div>
       </div>
-      <div class="proof-text">Build better habits, one day at a time 🔥</div>
+      <div style="font-size:26px;font-weight:600;color:var(--text);margin-top:28px;line-height:1.25;">This number is about<br>to change <span style="color:var(--purple-light);">everything.</span></div>
+      <div style="font-size:14px;color:var(--muted);margin-top:14px;line-height:1.6;padding:0 10px;">People who track daily habits are <strong style="color:var(--text);">3x more likely</strong> to stick with them. Your streak is the one number that keeps you honest.</div>
+      <div style="margin-top:28px;display:flex;flex-direction:column;gap:10px;padding:0 4px;">
+        <div style="background:var(--card);border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:12px;border:1px solid var(--border);">
+          <div style="font-size:22px;">⚡</div>
+          <div style="text-align:left;"><div style="font-size:13px;font-weight:600;color:var(--text);">Miss a day? Rescue it.</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">Complete double habits to earn your streak back</div></div>
+        </div>
+        <div style="background:var(--card);border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:12px;border:1px solid var(--border);">
+          <div style="font-size:22px;">👥</div>
+          <div style="text-align:left;"><div style="font-size:13px;font-weight:600;color:var(--text);">Compete with friends.</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">See who has the longest streak and nudge slackers</div></div>
+        </div>
+        <div style="background:var(--card);border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:12px;border:1px solid var(--border);">
+          <div style="font-size:22px;">🔥</div>
+          <div style="text-align:left;"><div style="font-size:13px;font-weight:600;color:var(--text);">One streak. Total focus.</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">No fluff, no noise — just your daily commitment</div></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Step 1: Pick habits -->
+  <!-- Step 1: Name first — make it personal immediately -->
   <div class="ob-step" id="ob-1">
-    <div class="ob-step-title">Pick your habits</div>
-    <div class="ob-step-sub">Choose at least 1 to start. You can always add more later.</div>
-    <div class="selected-count" id="selCount">0 selected</div>
-    <div class="habit-grid" id="habitGrid">
-      <div class="habit-tile" data-habit="Morning workout" data-icon="💪" data-color="hi-purple" onclick="toggleTile(this)"><div class="habit-tile-icon">💪</div><div class="habit-tile-name">Morning workout</div><div class="habit-tile-desc">30 min exercise</div></div>
-      <div class="habit-tile" data-habit="Drink water" data-icon="💧" data-color="hi-amber" onclick="toggleTile(this)"><div class="habit-tile-icon">💧</div><div class="habit-tile-name">Drink water</div><div class="habit-tile-desc">8 glasses/day</div></div>
-      <div class="habit-tile" data-habit="Evening run" data-icon="🏃" data-color="hi-green" onclick="toggleTile(this)"><div class="habit-tile-icon">🏃</div><div class="habit-tile-name">Evening run</div><div class="habit-tile-desc">2km minimum</div></div>
-      <div class="habit-tile" data-habit="Meditate" data-icon="🧘" data-color="hi-red" onclick="toggleTile(this)"><div class="habit-tile-icon">🧘</div><div class="habit-tile-name">Meditate</div><div class="habit-tile-desc">10 min daily</div></div>
-      <div class="habit-tile" data-habit="Read" data-icon="📚" data-color="hi-purple" onclick="toggleTile(this)"><div class="habit-tile-icon">📚</div><div class="habit-tile-name">Read</div><div class="habit-tile-desc">20 pages/day</div></div>
-      <div class="habit-tile" data-habit="Sleep 8hrs" data-icon="😴" data-color="hi-star" onclick="toggleTile(this)"><div class="habit-tile-icon">😴</div><div class="habit-tile-name">Sleep 8hrs</div><div class="habit-tile-desc">Bed by 10pm</div></div>
-    </div>
-    <div class="custom-row">
-      <input class="custom-input" id="customInput" placeholder="Add your own habit..." maxlength="28"/>
-      <button class="add-btn" onclick="addCustomTile()">+ Add</button>
+    <div style="text-align:center;padding:30px 0 20px;">
+      <div style="font-size:48px;margin-bottom:16px;">👋</div>
+      <div style="font-size:24px;font-weight:600;color:var(--text);margin-bottom:8px;">First, what should<br>we call you?</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:28px;">Your name goes on your public streak profile.</div>
+      <input class="text-input" id="nameInput" placeholder="Enter your name..." maxlength="20" oninput="obUpdateCta()" style="font-size:18px;text-align:center;padding:16px;"/>
+      <div style="margin-top:14px;font-size:12px;color:var(--muted);">Also pick a username for your public profile</div>
+      <input class="text-input" id="usernameInput" placeholder="@username" maxlength="20" oninput="obUpdateCta()" style="margin-top:8px;font-size:16px;text-align:center;padding:14px;"/>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;" id="usernameHint">Letters, numbers and underscores only</div>
     </div>
   </div>
 
-  <!-- Step 2: Reminder -->
+  <!-- Step 2: Pick habits -->
   <div class="ob-step" id="ob-2">
-    <div class="ob-step-title">Daily reminder</div>
-    <div class="ob-step-sub">We'll nudge you so your streak never slips.</div>
-    <div class="time-display" id="timeDisplay"><span>08</span>:00</div>
-    <div class="period-row">
-      <button class="period-btn active" id="amBtn" onclick="setPeriod('AM')">AM</button>
-      <button class="period-btn" id="pmBtn" onclick="setPeriod('PM')">PM</button>
-    </div>
-    <div class="slider-row"><span class="slider-label">Hr</span><input type="range" min="1" max="12" value="8" id="hourSlider" oninput="updateTime()"><span class="slider-val" id="hourVal">8</span></div>
-    <div class="slider-row"><span class="slider-label">Min</span><input type="range" min="0" max="55" value="0" step="5" id="minSlider" oninput="updateTime()"><span class="slider-val" id="minVal">00</span></div>
-    <div class="days-label">Remind me on</div>
-    <div class="day-row">
-      <div class="day-btn on" onclick="this.classList.toggle('on')">M</div>
-      <div class="day-btn on" onclick="this.classList.toggle('on')">T</div>
-      <div class="day-btn on" onclick="this.classList.toggle('on')">W</div>
-      <div class="day-btn on" onclick="this.classList.toggle('on')">T</div>
-      <div class="day-btn on" onclick="this.classList.toggle('on')">F</div>
-      <div class="day-btn" onclick="this.classList.toggle('on')">S</div>
-      <div class="day-btn" onclick="this.classList.toggle('on')">S</div>
+    <div style="padding-top:10px;">
+      <div style="font-size:22px;font-weight:600;color:var(--text);margin-bottom:6px;">What will you<br>commit to daily?</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:6px;">Choose at least 1. Each one adds to your streak.</div>
+      <div class="selected-count" id="selCount">0 selected</div>
+      <div class="habit-grid" id="habitGrid">
+        <div class="habit-tile" data-habit="Morning workout" data-icon="💪" data-color="hi-purple" onclick="toggleTile(this)"><div class="habit-tile-icon">💪</div><div class="habit-tile-name">Morning workout</div><div class="habit-tile-desc">30 min exercise</div></div>
+        <div class="habit-tile" data-habit="Drink water" data-icon="💧" data-color="hi-amber" onclick="toggleTile(this)"><div class="habit-tile-icon">💧</div><div class="habit-tile-name">Drink water</div><div class="habit-tile-desc">8 glasses/day</div></div>
+        <div class="habit-tile" data-habit="Evening run" data-icon="🏃" data-color="hi-green" onclick="toggleTile(this)"><div class="habit-tile-icon">🏃</div><div class="habit-tile-name">Evening run</div><div class="habit-tile-desc">2km minimum</div></div>
+        <div class="habit-tile" data-habit="Meditate" data-icon="🧘" data-color="hi-red" onclick="toggleTile(this)"><div class="habit-tile-icon">🧘</div><div class="habit-tile-name">Meditate</div><div class="habit-tile-desc">10 min daily</div></div>
+        <div class="habit-tile" data-habit="Read" data-icon="📚" data-color="hi-purple" onclick="toggleTile(this)"><div class="habit-tile-icon">📚</div><div class="habit-tile-name">Read</div><div class="habit-tile-desc">20 pages/day</div></div>
+        <div class="habit-tile" data-habit="Sleep 8hrs" data-icon="😴" data-color="hi-star" onclick="toggleTile(this)"><div class="habit-tile-icon">😴</div><div class="habit-tile-name">Sleep 8hrs</div><div class="habit-tile-desc">Bed by 10pm</div></div>
+      </div>
+      <div class="custom-row">
+        <input class="custom-input" id="customInput" placeholder="Add your own habit..." maxlength="28"/>
+        <button class="add-btn" onclick="addCustomTile()">+ Add</button>
+      </div>
     </div>
   </div>
 
-  <!-- Step 3: Name + Goal -->
+  <!-- Step 3: Launch screen — dramatic ending -->
   <div class="ob-step" id="ob-3">
-    <div class="ob-step-title">Almost there</div>
-    <div class="ob-step-sub">Let's make this personal.</div>
-    <div class="input-group">
-      <div class="input-label">Your name</div>
-      <input class="text-input" id="nameInput" placeholder="What should we call you?" maxlength="20" oninput="obUpdateCta()"/>
-    </div>
-    <div class="input-group">
-      <div class="input-label">Your goal</div>
-      <div class="goal-option selected" onclick="selectGoal(this)"><div class="goal-icon">📅</div><div><div class="goal-text">30-day streak</div><div class="goal-sub">Build a solid foundation</div></div><div class="goal-radio"><div class="goal-radio-dot"></div></div></div>
-      <div class="goal-option" onclick="selectGoal(this)"><div class="goal-icon">💪</div><div><div class="goal-text">100-day streak</div><div class="goal-sub">Transform your lifestyle</div></div><div class="goal-radio"><div class="goal-radio-dot"></div></div></div>
-      <div class="goal-option" onclick="selectGoal(this)"><div class="goal-icon">♾️</div><div><div class="goal-text">No end goal</div><div class="goal-sub">Just keep going forever</div></div><div class="goal-radio"><div class="goal-radio-dot"></div></div></div>
+    <div style="text-align:center;padding:40px 0 20px;">
+      <div style="font-size:64px;margin-bottom:20px;">🚀</div>
+      <div style="font-size:26px;font-weight:600;color:var(--text);line-height:1.25;margin-bottom:12px;" id="obFinalTitle">You're ready,<br><span style="color:var(--purple-light);" id="obFinalName">champion</span>.</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:28px;">Your streak starts the moment you check off your first habit today. Don't let Day 1 end without it.</div>
+      <div style="background:var(--card);border-radius:16px;border:1px solid var(--border);padding:20px;margin-bottom:20px;">
+        <div style="font-size:12px;font-weight:600;letter-spacing:0.1em;color:var(--muted);margin-bottom:12px;">YOUR COMMITMENT</div>
+        <div id="obCommitList" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);">Your profile is public — friends can find you by username</div>
+      <div style="font-size:13px;font-weight:600;color:var(--purple-light);margin-top:4px;" id="obUsernameDisplay"></div>
     </div>
   </div>
 
@@ -407,7 +412,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
     <button class="ob-back" id="obBack" style="display:none;" onclick="obBack()">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polyline points="10,3 5,8 10,13" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Back
     </button>
-    <button class="ob-btn" id="obBtn" onclick="obNext()">Get started</button>
+    <button class="ob-btn" id="obBtn" onclick="obNext()">Let's go</button>
   </div>
 </div>
 
@@ -705,6 +710,58 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
   </div>
 </div>
 
+<!-- ══════════════════════════════════════
+     FRIENDS
+══════════════════════════════════════ -->
+<div class="page" id="page-friends">
+  <div class="page-header">
+    <div class="page-title">Friends</div>
+    <div class="page-sub">Compete, motivate, and hold each other accountable</div>
+  </div>
+
+  <!-- Your public profile card -->
+  <div class="section" style="margin-top:16px;">
+    <div class="card" style="padding:16px;">
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;color:var(--muted);margin-bottom:10px;">YOUR PUBLIC PROFILE</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--purple-bg);display:flex;align-items:center;justify-content:center;font-size:20px;">🔥</div>
+        <div>
+          <div style="font-size:15px;font-weight:600;color:var(--text);" id="friendsMyName">-</div>
+          <div style="font-size:12px;color:var(--purple-light);" id="friendsMyUsername">@-</div>
+        </div>
+        <div style="margin-left:auto;text-align:right;">
+          <div style="font-size:20px;font-weight:700;color:var(--text);" id="friendsMyStreak">0</div>
+          <div style="font-size:10px;color:var(--muted);">🔥 streak</div>
+        </div>
+      </div>
+      <button onclick="shareInvite()" style="width:100%;padding:11px;border-radius:10px;background:var(--purple);color:#EEEEFF;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;">📨 Invite friends to StreakFit</button>
+    </div>
+  </div>
+
+  <!-- Add friend -->
+  <div class="section" style="margin-top:18px;">
+    <div class="section-title" style="margin-bottom:10px;">Add a friend</div>
+    <div style="display:flex;gap:8px;">
+      <input id="friendUsernameInput" class="text-input" placeholder="Enter their @username" style="flex:1;margin:0;" oninput="this.value=this.value.replace('@','')"/>
+      <button onclick="addFriend()" style="padding:12px 16px;border-radius:10px;background:var(--purple);color:#EEEEFF;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;white-space:nowrap;">Add</button>
+    </div>
+  </div>
+
+  <!-- Friends list -->
+  <div class="section" style="margin-top:18px;">
+    <div class="section-header">
+      <span class="section-title">Leaderboard</span>
+      <span style="font-size:12px;color:var(--muted);" id="friendsCount">0 friends</span>
+    </div>
+    <div id="friendsList">
+      <div style="text-align:center;padding:30px 20px;color:var(--muted);font-size:13px;line-height:1.6;">
+        <div style="font-size:32px;margin-bottom:10px;">👥</div>
+        Add friends by username to see their streaks here
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- SHARED NAV -->
 <div class="bottom-nav" id="sharedNav" style="display:none;">
   <div class="nav-btn" id="nav-home" onclick="navigate('home')">
@@ -714,6 +771,10 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
   <div class="nav-btn" id="nav-progress" onclick="navigate('progress')">
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><polyline points="2,18 7,10 12,14 18,5" stroke="#6666AA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="nav-progress-icon"/></svg>
     <span class="nav-label" id="nav-progress-label">Progress</span>
+  </div>
+  <div class="nav-btn" id="nav-friends" onclick="navigate('friends')">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="8" cy="8" r="3" stroke="#6666AA" stroke-width="2" id="nav-friends-icon1"/><path d="M2 19 Q8 15 14 19" stroke="#6666AA" stroke-width="2" stroke-linecap="round" id="nav-friends-icon2"/><circle cx="16" cy="7" r="2.5" stroke="#6666AA" stroke-width="1.8" id="nav-friends-icon3"/><path d="M13 18 Q16 15.5 19 18" stroke="#6666AA" stroke-width="1.8" stroke-linecap="round" id="nav-friends-icon4"/></svg>
+    <span class="nav-label" id="nav-friends-label">Friends</span>
   </div>
   <div class="nav-btn" id="nav-profile" onclick="navigate('profile')">
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="8" r="4" stroke="#6666AA" stroke-width="2" id="nav-profile-icon1"/><path d="M3 20 Q11 16 19 20" stroke="#6666AA" stroke-width="2" stroke-linecap="round" id="nav-profile-icon2"/></svg>
@@ -750,6 +811,7 @@ const state = {
   isPremium: false,
   notifTime: '08:00',
   streakExtendedToday: false,
+  username: '',
   missedYesterday: false,
   rescueActive: false,
   rescueHabitsDone: 0,
@@ -763,6 +825,7 @@ async function dbSaveUser() {
       const todayDate = new Date().toISOString().split('T')[0];
       await sb.from('users').update({
         name: state.name,
+        username: state.username,
         streak_days: state.streakDays,
         freeze_used: state.freezeUsed,
         rescue_used: state.rescueUsed,
@@ -772,7 +835,7 @@ async function dbSaveUser() {
       }).eq('id', state.userId);
     } else {
       const { data, error } = await sb.from('users').insert({
-        name: state.name, streak_days: 0, freeze_used: false, rescue_used: false,
+        name: state.name, username: state.username, streak_days: 0, freeze_used: false, rescue_used: false,
       }).select().single();
       if (data) { state.userId = data.id; localStorage.setItem('sf_uid', data.id); }
     }
@@ -826,6 +889,7 @@ async function dbLoadUser(userId) {
     state.rescueUsed = user.rescue_used;
     state.isPremium = user.is_premium || false;
     state.notifTime = user.notif_time || '08:00';
+    state.username = user.username || '';
     state.habits = (habits||[]).map((h, i) => {
       const alreadyDone = doneIds.has(h.id); // h.id is the Supabase UUID
       return {
@@ -867,21 +931,31 @@ function obRenderDots() {
 }
 
 function obUpdateCta() {
-  const labels=['Get started','Continue','Set reminder','Start my streak 🔥'];
+  const labels=['Get started 🔥','Continue','Choose habits','Start Day 1 🚀'];
   document.getElementById('obBtn').textContent = labels[obStep];
   const btn = document.getElementById('obBtn');
-  if (obStep===1) btn.classList.toggle('disabled', selectedHabits.length===0);
-  else if (obStep===3) btn.classList.toggle('disabled', !document.getElementById('nameInput').value.trim());
-  else btn.classList.remove('disabled');
+  if (obStep===1) {
+    const name = document.getElementById('nameInput').value.trim();
+    const username = document.getElementById('usernameInput').value.trim();
+    btn.classList.toggle('disabled', !name || !username);
+  } else if (obStep===2) {
+    btn.classList.toggle('disabled', selectedHabits.length===0);
+  } else {
+    btn.classList.remove('disabled');
+  }
 }
 
 function obNext() {
   if (document.getElementById('obBtn').classList.contains('disabled')) return;
   if (obStep===OB_TOTAL-1) { finishOnboarding(); return; }
+  // moving to step 3 — populate the commitment screen
+  if (obStep===2) populateCommitScreen();
   document.getElementById('ob-'+obStep).classList.remove('ob-active');
   obStep++;
   document.getElementById('ob-'+obStep).classList.add('ob-active');
-  obRenderDots(); obUpdateCta();
+  obRenderDots(); obUpdateCta(); if(obStep===0) setTimeout(animateStreakCounter, 400);
+  // animate streak counter on step 0
+  if (obStep===0) animateStreakCounter();
 }
 
 function obBack() {
@@ -890,6 +964,35 @@ function obBack() {
   obStep--;
   document.getElementById('ob-'+obStep).classList.add('ob-active');
   obRenderDots(); obUpdateCta();
+}
+
+function animateStreakCounter() {
+  const el = document.getElementById('obStreakCounter');
+  if (!el) return;
+  let n = 0; const target = 47;
+  const interval = setInterval(() => {
+    n += 3; if (n >= target) { n = target; clearInterval(interval); }
+    el.textContent = n;
+  }, 30);
+}
+
+function populateCommitScreen() {
+  const name = document.getElementById('nameInput').value.trim();
+  const username = document.getElementById('usernameInput').value.trim();
+  const titleEl = document.getElementById('obFinalTitle');
+  const nameEl = document.getElementById('obFinalName');
+  const usernameEl = document.getElementById('obUsernameDisplay');
+  const listEl = document.getElementById('obCommitList');
+  if (nameEl) nameEl.textContent = name || 'champion';
+  if (usernameEl) usernameEl.textContent = '@' + (username || 'you');
+  if (listEl) {
+    listEl.innerHTML = selectedHabits.map(h => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span style="font-size:20px;">${h.icon}</span>
+        <span style="font-size:13px;font-weight:500;color:var(--text);">${h.name}</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--green);font-weight:600;">Every day</span>
+      </div>`).join('');
+  }
 }
 
 function toggleTile(el) {
@@ -938,6 +1041,7 @@ function selectGoal(el) {
 
 async function finishOnboarding() {
   state.name = document.getElementById('nameInput').value.trim() || 'there';
+  state.username = document.getElementById('usernameInput').value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'') || 'user' + Math.floor(Math.random()*9999);
   state.habits = selectedHabits.length ? selectedHabits.map((h,i)=>({
     id:i+1, dbId:null, name:h.name, icon:h.icon, color:h.color, streak:0, done:false, meta:'Every day'
   })) : [
@@ -971,11 +1075,12 @@ function navigate(page) {
   if (page==='progress') renderProgress();
   if (page==='streak') renderStreak();
   if (page==='profile') renderProfile();
+  if (page==='friends') renderFriends();
 }
 
 function updateNav(page) {
   const nav = document.getElementById('sharedNav');
-  const pages = ['home','progress','streak','profile'];
+  const pages = ['home','progress','streak','friends','profile'];
   const showNav = pages.includes(page) && page !== 'onboarding';
   nav.style.display = showNav ? 'flex' : 'none';
   pages.forEach(p => {
@@ -987,6 +1092,11 @@ function updateNav(page) {
   });
   // update icon colors
   const purple = '#7C6FF7', gray = '#6666AA';
+  const fi1 = document.getElementById('nav-friends-icon1');
+  const fi2 = document.getElementById('nav-friends-icon2');
+  const fi3 = document.getElementById('nav-friends-icon3');
+  const fi4 = document.getElementById('nav-friends-icon4');
+  [fi1,fi2,fi3,fi4].forEach(el => { if(el) { const attr = el.tagName==='circle'?'stroke':'stroke'; el.setAttribute('stroke', page==='friends' ? purple : gray); }});
   const pi2 = document.getElementById('nav-profile-icon1');
   const pi3 = document.getElementById('nav-profile-icon2');
   if (pi2) pi2.setAttribute('stroke', page==='profile' ? purple : gray);
@@ -1620,6 +1730,105 @@ function confirmReset() {
   if (confirm('Reset all your data? This cannot be undone.')) {
     localStorage.removeItem('sf_uid');
     location.reload();
+  }
+}
+
+
+// ── FRIENDS ──
+async function renderFriends() {
+  document.getElementById('friendsMyName').textContent = state.name || 'You';
+  document.getElementById('friendsMyUsername').textContent = '@' + (state.username || '-');
+  document.getElementById('friendsMyStreak').textContent = state.streakDays;
+  await loadFriends();
+}
+
+async function addFriend() {
+  const input = document.getElementById('friendUsernameInput');
+  const username = input.value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
+  if (!username) { showToast('Enter a username'); return; }
+  if (!state.userId) { showToast('Please complete onboarding first'); return; }
+
+  // find user by username
+  try {
+    const { data: friend } = await sb.from('users').select('id,name,username,streak_days').eq('username', username).single();
+    if (!friend) { showToast('User @' + username + ' not found'); return; }
+    if (friend.id === state.userId) { showToast('That\'s you!'); return; }
+
+    // add friendship
+    const { error } = await sb.from('friendships').upsert(
+      { user_id: state.userId, friend_id: friend.id },
+      { onConflict: 'user_id,friend_id' }
+    );
+    if (error) throw error;
+    input.value = '';
+    showToast('Added @' + username + '! 👊');
+    await loadFriends();
+  } catch(e) {
+    console.warn('addFriend:', e);
+    showToast('Could not find @' + username);
+  }
+}
+
+async function loadFriends() {
+  if (!state.userId) return;
+  try {
+    // get friend IDs
+    const { data: friendships } = await sb.from('friendships').select('friend_id').eq('user_id', state.userId);
+    if (!friendships || friendships.length === 0) {
+      document.getElementById('friendsCount').textContent = '0 friends';
+      document.getElementById('friendsList').innerHTML = '<div style="text-align:center;padding:30px 20px;color:var(--muted);font-size:13px;line-height:1.6;"><div style="font-size:32px;margin-bottom:10px;">👥</div>Add friends by username to see their streaks here</div>';
+      return;
+    }
+    const friendIds = friendships.map(f => f.friend_id);
+
+    // get friend profiles
+    const { data: friends } = await sb.from('users').select('id,name,username,streak_days').in('id', friendIds);
+
+    // check who completed habits today
+    const today = new Date().toISOString().split('T')[0];
+    const { data: logs } = await sb.from('habit_logs').select('user_id').eq('done_at', today).in('user_id', friendIds);
+    const doneToday = new Set((logs||[]).map(l => l.user_id));
+
+    // sort by streak descending
+    const sorted = [...(friends||[])].sort((a,b) => b.streak_days - a.streak_days);
+
+    // add yourself at correct position
+    const allUsers = [...sorted, { id: state.userId, name: state.name, username: state.username, streak_days: state.streakDays, isMe: true }]
+      .sort((a,b) => b.streak_days - a.streak_days);
+
+    document.getElementById('friendsCount').textContent = friendships.length + ' friend' + (friendships.length!==1?'s':'');
+    document.getElementById('friendsList').innerHTML = allUsers.map((u, i) => {
+      const doneToday2 = u.isMe ? state.habits.every(h => h.done) : doneToday.has(u.id);
+      const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+      return `<div style="background:var(--card);border-radius:var(--radius-sm);border:1px solid ${u.isMe?'var(--purple)':'var(--border)'};padding:13px 14px;display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+        <div style="font-size:22px;width:28px;text-align:center;">${medal || (i+1)}</div>
+        <div style="width:38px;height:38px;border-radius:50%;background:${u.isMe?'var(--purple-bg)':'var(--card2)'};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">${u.isMe?'🔥':'😊'}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:600;color:var(--text);">${u.name}${u.isMe?' (you)':''}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:1px;">@${u.username||'?'} · ${doneToday2?'<span style=\"color:var(--green)\">✓ Done today</span>':'<span style=\"color:var(--muted)\">Not done yet</span>'}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:18px;font-weight:700;color:var(--text);">${u.streak_days}</div>
+          <div style="font-size:10px;color:var(--muted);">🔥 days</div>
+        </div>
+        ${!u.isMe && !doneToday2 ? `<button onclick="nudgeFriend('${u.id}','${u.name}')" style="padding:6px 10px;border-radius:8px;background:var(--amber-bg);color:var(--amber);font-size:11px;font-weight:600;border:none;cursor:pointer;font-family:inherit;flex-shrink:0;">Nudge 👋</button>` : ''}
+      </div>`;
+    }).join('');
+  } catch(e) { console.warn('loadFriends:', e); }
+}
+
+function nudgeFriend(friendId, name) {
+  // In a real app this would send a push notification — for now show a toast
+  showToast('Nudged ' + name + '! 👋');
+}
+
+function shareInvite() {
+  const url = window.location.origin + window.location.pathname;
+  const text = 'Join me on StreakFit! I\'m on a ' + state.streakDays + '-day streak. Can you beat me? ' + url;
+  if (navigator.share) {
+    navigator.share({ title: 'StreakFit', text, url });
+  } else {
+    navigator.clipboard.writeText(text).then(() => showToast('Invite link copied! 📋'));
   }
 }
 
