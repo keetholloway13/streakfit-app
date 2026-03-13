@@ -1173,13 +1173,24 @@ function updateNav(page) {
 }
 
 // ── HOME ──
-function renderHome() {
-  const now=new Date();
+async function renderHome() {
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
   const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   document.getElementById('dateLabel').textContent=days[now.getDay()]+', '+months[now.getMonth()]+' '+now.getDate();
   document.getElementById('userName').textContent=state.name||'there';
   document.getElementById('streakNum').textContent=state.streakDays;
+
+  // if date has changed since last render, re-fetch today's logs and reset habits
+  if (today !== lastKnownDate && state.userId) {
+    lastKnownDate = today;
+    const { data: logs } = await sb.from('habit_logs')
+      .select('habit_id').eq('user_id', state.userId).eq('done_at', today);
+    const doneIds = new Set((logs||[]).map(l => l.habit_id));
+    state.habits = state.habits.map(h => ({ ...h, done: doneIds.has(h.dbId) }));
+  }
+
   renderHabits();
   updateProgress();
 }
