@@ -646,6 +646,20 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
     <button onclick="openAddHabit()" style="width:100%;padding:13px;border-radius:var(--radius-sm);background:var(--purple-bg);color:var(--purple-light);font-size:14px;font-weight:600;border:1.5px dashed rgba(124,111,247,0.3);cursor:pointer;font-family:inherit;margin-top:2px;">+ Add new habit</button>
   </div>
 
+  <div class="section" id="premiumManageSection" style="margin-top:20px;display:none;">
+    <div class="section-title" style="margin-bottom:12px;">Premium</div>
+    <div class="card" style="padding:16px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="font-size:28px;">⭐</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);">StreakFit Premium</div>
+          <div style="font-size:12px;color:var(--green);margin-top:2px;">Active — $2.99/month</div>
+        </div>
+      </div>
+      <button onclick="manageSubscription()" style="width:100%;padding:12px;border-radius:10px;background:rgba(255,80,80,0.1);color:#ff6b6b;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:inherit;">Cancel subscription</button>
+    </div>
+  </div>
+
   <div class="section" id="profileUpsellSection" style="margin-top:20px;">
     <div class="section-title" style="margin-bottom:12px;">Premium</div>
     <div class="card" style="padding:16px;">
@@ -1675,6 +1689,8 @@ function renderProfile() {
   // show/hide upsell section
   const profileUpsell = document.getElementById('profileUpsellSection');
   if (profileUpsell) profileUpsell.style.display = state.isPremium ? 'none' : 'block';
+  const premiumManage = document.getElementById('premiumManageSection');
+  if (premiumManage) premiumManage.style.display = state.isPremium ? 'block' : 'none';
   // update plan label
   const planEl = document.querySelector('#page-profile .card div div:nth-child(2)');
   if (planEl) planEl.textContent = state.isPremium ? '⭐ Premium' : 'Free plan';
@@ -1998,6 +2014,10 @@ function shareInvite() {
 
 // ── PAYMENTS ──
 const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/14AaEYed89KIgdD8PE9oc00';
+
+function manageSubscription() {
+  window.location.href = 'https://billing.stripe.com/p/login/14AaEYed89KIgdD8PE9oc00';
+}
 
 function startUpgrade() {
   if (!state.userId) { showToast('Please complete onboarding first'); return; }
