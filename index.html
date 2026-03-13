@@ -1247,6 +1247,11 @@ async function buildCalendar() {
       });
     } catch(e) { console.warn('calendar logs:', e); }
   }
+  // Override today with live local state so calendar updates instantly
+  // without waiting for DB round-trip
+  const todayKey = `${year}-${String(month+1).padStart(2,'0')}-${String(todayDate).padStart(2,'0')}`;
+  const doneTodayCount = state.habits.filter(h => h.done).length;
+  logsMap[todayKey] = Math.max(logsMap[todayKey] || 0, doneTodayCount);
 
   // Calculate completion %
   let fullDays = 0, partialDays = 0, pastDays = 0;
