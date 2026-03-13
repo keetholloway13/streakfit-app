@@ -2030,12 +2030,31 @@ function startUpgrade() {
 }
 
 // reset upgrade button when page becomes visible again (user backed out of Stripe)
-document.addEventListener('visibilitychange', () => {
+let lastKnownDate = new Date().toISOString().split('T')[0];
+
+document.addEventListener('visibilitychange', async () => {
   if (document.visibilityState === 'visible') {
+    // reset upgrade button
     const btn = document.getElementById('upgradeBtn');
     if (btn) {
       btn.textContent = 'Start 7-day free trial';
       btn.style.opacity = '1';
+    }
+    // if the date has changed since app was last open, reload habits
+    const today = new Date().toISOString().split('T')[0];
+    if (today !== lastKnownDate && state.userId) {
+      lastKnownDate = today;
+      // reset all habits to unchecked
+      state.habits = state.habits.map(h => ({ ...h, done: false }));
+      // re-fetch today's logs from Supabase
+      const { data: logs } = await sb.from('habit_logs')
+        .select('habit_id').eq('user_id', state.userId).eq('done_at', today);
+      const doneIds = new Set((logs||[]).map(l => l.habit_id));
+      state.habits = state.habits.map(h => ({ ...h, done: doneIds.has(h.dbId) }));
+      // re-render current page
+      if (currentPage === 'home') { renderHome(); buildCalendar(); }
+      if (currentPage === 'progress') renderProgress();
+      if (currentPage === 'streak') renderStreak();
     }
   }
 });
