@@ -1796,13 +1796,14 @@ async function addFriend() {
     if (friend.id === uid) { showToast('That\'s you! 😄'); return; }
 
     // check not already friends or pending
-    const { data: existing } = await sb.from('friendships')
+    const { data: existingRows } = await sb.from('friendships')
       .select('id,status')
       .eq('user_id', uid)
       .eq('friend_id', friend.id)
-      .maybeSingle();
-    if (existing) {
-      showToast(existing.status === 'pending' ? 'Request already sent!' : 'Already friends!');
+      .limit(1);
+    if (existingRows && existingRows.length > 0) {
+      const status = existingRows[0].status;
+      showToast(status === 'pending' ? 'Request already sent!' : 'Already friends!');
       return;
     }
 
