@@ -69,7 +69,7 @@ body {
 .toast.show { transform:translateX(-50%) translateY(0); }
 
 /* ── ONBOARDING ── */
-#page-onboarding { padding-bottom:0; }
+#page-onboarding { padding-bottom:0; display:flex; flex-direction:column; }
 .ob-progress {
   position:fixed; top:0; left:50%; transform:translateX(-50%);
   width:100%; max-width:420px; padding:52px 24px 14px;
@@ -83,13 +83,12 @@ body {
 .ob-dot.inactive { width:8px; }
 .ob-skip { font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; }
 .ob-cta {
-  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
-  width:100%; max-width:420px;
-  padding:24px 20px calc(20px + env(safe-area-inset-bottom, 0px));
-  background:linear-gradient(to top, var(--bg) 60%, transparent); z-index:50;
-  pointer-events:none;
+  position:sticky; bottom:0; left:0;
+  width:100%;
+  padding:20px 20px calc(16px + env(safe-area-inset-bottom, 0px));
+  background:linear-gradient(to top, var(--bg) 65%, transparent);
+  z-index:50; margin-top:-60px;
 }
-.ob-cta > * { pointer-events:all; }
 .ob-btn {
   width:100%; padding:15px; border-radius:14px; background:var(--purple); color:#EEEEFF;
   font-size:16px; font-weight:600; border:none; cursor:pointer; font-family:'DM Sans',sans-serif,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;
@@ -101,7 +100,7 @@ body {
   display:flex; align-items:center; gap:5px; font-size:13px; color:var(--muted);
   background:none; border:none; font-family:'DM Sans',sans-serif,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif; cursor:pointer; margin-bottom:10px;
 }
-.ob-step { display:none; padding:110px 24px 180px; }
+.ob-step { display:none; padding:110px 24px 40px; }
 .ob-step.ob-active { display:block; }
 
 /* Welcome step */
@@ -1825,11 +1824,12 @@ async function addFriend() {
 }
 
 async function loadFriends() {
-  if (!state.userId) return;
+  const uid = state.userId || loadUserId();
+  if (!uid) return;
   try {
     // get accepted friends + pending requests sent to me
-    const { data: myFriendships } = await sb.from('friendships').select('friend_id,status').eq('user_id', state.userId).eq('status','accepted');
-    const { data: incomingRequests } = await sb.from('friendships').select('id,user_id,status').eq('friend_id', state.userId).eq('status','pending');
+    const { data: myFriendships } = await sb.from('friendships').select('friend_id,status').eq('user_id', uid).eq('status','accepted');
+    const { data: incomingRequests } = await sb.from('friendships').select('id,user_id,status').eq('friend_id', uid).eq('status','pending');
 
     // show incoming requests
     const requestsEl = document.getElementById('friendRequestsList');
@@ -1858,6 +1858,7 @@ async function loadFriends() {
       return;
     }
     const friendIds = myFriendships.map(f => f.friend_id);
+    if (!state.userId) state.userId = uid;
 
     // get friend profiles
     const { data: friends } = await sb.from('users').select('id,name,username,streak_days').in('id', friendIds);
@@ -1871,7 +1872,7 @@ async function loadFriends() {
     const sorted = [...(friends||[])].sort((a,b) => b.streak_days - a.streak_days);
 
     // add yourself at correct position
-    const allUsers = [...sorted, { id: state.userId, name: state.name, username: state.username, streak_days: state.streakDays, isMe: true }]
+    const allUsers = [...sorted, { id: uid, name: state.name, username: state.username, streak_days: state.streakDays, isMe: true }]
       .sort((a,b) => b.streak_days - a.streak_days);
 
     document.getElementById('friendsCount').textContent = friendships.length + ' friend' + (friendships.length!==1?'s':'');
