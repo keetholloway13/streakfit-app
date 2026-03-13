@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>StreakFit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
@@ -84,7 +84,8 @@ body {
 .ob-skip { font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; }
 .ob-cta {
   position:fixed; bottom:0; left:50%; transform:translateX(-50%);
-  width:100%; max-width:420px; padding:24px 20px 44px;
+  width:100%; max-width:420px;
+  padding:24px 20px calc(20px + env(safe-area-inset-bottom, 0px));
   background:linear-gradient(to top, var(--bg) 60%, transparent); z-index:50;
   pointer-events:none;
 }
