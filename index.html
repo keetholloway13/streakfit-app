@@ -1890,7 +1890,10 @@ async function loadFriends() {
           <div style="font-size:18px;font-weight:700;color:var(--text);">${u.streak_days}</div>
           <div style="font-size:10px;color:var(--muted);">🔥 days</div>
         </div>
-        ${!u.isMe && !doneToday2 ? `<button onclick="nudgeFriend('${u.id}','${u.name}')" style="padding:6px 10px;border-radius:8px;background:var(--amber-bg);color:var(--amber);font-size:11px;font-weight:600;border:none;cursor:pointer;font-family:inherit;flex-shrink:0;">Nudge 👋</button>` : ''}
+        ${!u.isMe ? `<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
+          ${!doneToday2 ? `<button onclick="nudgeFriend('${u.id}','${u.name}')" style="padding:5px 9px;border-radius:7px;background:var(--amber-bg);color:var(--amber);font-size:11px;font-weight:600;border:none;cursor:pointer;font-family:inherit;">Nudge 👋</button>` : ''}
+          <button onclick="removeFriend('${u.id}','${u.name}')" style="padding:5px 9px;border-radius:7px;background:rgba(255,80,80,0.1);color:#ff6b6b;font-size:11px;font-weight:600;border:none;cursor:pointer;font-family:inherit;">Remove</button>
+        </div>` : ''}
       </div>`;
     }).join('');
   } catch(e) { console.warn('loadFriends:', e); }
@@ -1925,6 +1928,21 @@ async function declineFriend(requestId) {
     showToast('Request declined');
     await loadFriends();
   } catch(e) {}
+}
+
+async function removeFriend(friendId, name) {
+  if (!confirm('Remove ' + name + ' as a friend?')) return;
+  const uid = state.userId || loadUserId();
+  try {
+    // delete both directions
+    await sb.from('friendships').delete().eq('user_id', uid).eq('friend_id', friendId);
+    await sb.from('friendships').delete().eq('user_id', friendId).eq('friend_id', uid);
+    showToast('Removed ' + name);
+    await loadFriends();
+  } catch(e) {
+    console.warn('removeFriend:', e);
+    showToast('Something went wrong');
+  }
 }
 
 function nudgeFriend(friendId, name) {
