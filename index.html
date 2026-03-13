@@ -69,7 +69,7 @@ body {
 .toast.show { transform:translateX(-50%) translateY(0); }
 
 /* ── ONBOARDING ── */
-#page-onboarding { padding-bottom:120px; }
+#page-onboarding { padding-bottom:140px; }
 .ob-progress {
   position:fixed; top:0; left:50%; transform:translateX(-50%);
   width:100%; max-width:420px; padding:52px 24px 14px;
@@ -83,12 +83,10 @@ body {
 .ob-dot.inactive { width:8px; }
 .ob-skip { font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; }
 .ob-cta {
-  position:sticky; bottom:0; left:0;
-  width:100%; padding:14px 24px 34px;
-  background:linear-gradient(to top, var(--bg) 70%, transparent); z-index:50;
-  margin-top:auto;
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:420px; padding:14px 24px 34px;
+  background:linear-gradient(to top, var(--bg) 80%, transparent); z-index:50;
 }
-#page-onboarding { display:flex; flex-direction:column; }
 .ob-btn {
   width:100%; padding:15px; border-radius:14px; background:var(--purple); color:#EEEEFF;
   font-size:16px; font-weight:600; border:none; cursor:pointer; font-family:'DM Sans',sans-serif,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;
@@ -1855,15 +1853,25 @@ async function loadFriends() {
 
 async function acceptFriend(requestId, name) {
   try {
-    await sb.from('friendships').update({ status: 'accepted' }).eq('id', requestId);
-    // also create reverse friendship
+    // get the original request details
     const { data: req } = await sb.from('friendships').select('user_id,friend_id').eq('id', requestId).single();
-    if (req) {
-      await sb.from('friendships').upsert({ user_id: req.friend_id, friend_id: req.user_id, status: 'accepted' }, { onConflict: 'user_id,friend_id' });
-    }
+    if (!req) throw new Error('Request not found');
+
+    // update original request to accepted
+    await sb.from('friendships').update({ status: 'accepted' }).eq('id', requestId);
+
+    // create or update the reverse so both sides see each other
+    await sb.from('friendships').upsert(
+      { user_id: req.friend_id, friend_id: req.user_id, status: 'accepted' },
+      { onConflict: 'user_id,friend_id' }
+    );
+
     showToast('You and ' + name + ' are now friends! 🎉');
     await loadFriends();
-  } catch(e) { showToast('Something went wrong'); }
+  } catch(e) {
+    console.warn('acceptFriend:', e);
+    showToast('Something went wrong');
+  }
 }
 
 async function declineFriend(requestId) {
