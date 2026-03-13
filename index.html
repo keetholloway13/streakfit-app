@@ -2015,14 +2015,13 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-function checkPremiumReturn() {
+async function checkPremiumReturn() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('premium') === 'true') {
     state.isPremium = true;
-    // reset freeze/rescue counts for premium
     state.freezeUsed = false;
     state.rescueUsed = false;
-    dbSaveUser();
+    await dbSaveUser();
     showOverlay('🎉', 'Welcome to Premium!', 'Your 7-day free trial has started. You now have 3 freezes/month and unlimited rescues.');
     window.history.replaceState({}, '', window.location.pathname);
   }
@@ -2058,6 +2057,8 @@ async function init() {
   const savedId = loadUserId();
   if (savedId) {
     const loaded = await dbLoadUser(savedId);
+    // check premium AFTER user is loaded so it doesn't get overwritten
+    await checkPremiumReturn();
     hideLoading();
     if (loaded) { navigate('home'); return; }
   }
@@ -2065,7 +2066,6 @@ async function init() {
   obRenderDots(); obUpdateCta();
 }
 
-checkPremiumReturn();
 init();
 scheduleNextNotif();
 </script>
