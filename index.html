@@ -1875,7 +1875,7 @@ async function loadFriends() {
     const allUsers = [...sorted, { id: uid, name: state.name, username: state.username, streak_days: state.streakDays, isMe: true }]
       .sort((a,b) => b.streak_days - a.streak_days);
 
-    document.getElementById('friendsCount').textContent = friendships.length + ' friend' + (friendships.length!==1?'s':'');
+    document.getElementById('friendsCount').textContent = myFriendships.length + ' friend' + (myFriendships.length!==1?'s':'');
     document.getElementById('friendsList').innerHTML = allUsers.map((u, i) => {
       const doneToday2 = u.isMe ? state.habits.every(h => h.done) : doneToday.has(u.id);
       const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
@@ -1902,7 +1902,7 @@ async function loadFriends() {
 async function acceptFriend(requestId, name) {
   try {
     // get the original request details
-    const { data: req } = await sb.from('friendships').select('user_id,friend_id').eq('id', requestId).single();
+    const { data: req } = await sb.from('friendships').select('user_id,friend_id').eq('id', requestId).maybeSingle();
     if (!req) throw new Error('Request not found');
 
     // update original request to accepted
