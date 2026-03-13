@@ -1997,6 +1997,8 @@ const SERVER_URL = 'https://streakfit-server.onrender.com'; // e.g. https://stre
 async function startUpgrade() {
   if (!state.userId) { showToast('Please complete onboarding first'); return; }
   const btn = document.getElementById('upgradeBtn');
+  if (btn.dataset.loading === 'true') return;
+  btn.dataset.loading = 'true';
   btn.textContent = 'Loading...';
   btn.style.opacity = '0.7';
   try {
@@ -2010,14 +2012,31 @@ async function startUpgrade() {
     });
     const { url, error } = await res.json();
     if (error) throw new Error(error);
+    // reset button before redirecting in case user comes back
+    btn.dataset.loading = 'false';
+    btn.textContent = 'Start 7-day free trial';
+    btn.style.opacity = '1';
     window.location.href = url;
   } catch(e) {
+    btn.dataset.loading = 'false';
     btn.textContent = 'Start 7-day free trial';
     btn.style.opacity = '1';
     showToast('Could not start checkout. Try again.');
     console.error(e);
   }
 }
+
+// reset upgrade button when page becomes visible again (user backed out of Stripe)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    const btn = document.getElementById('upgradeBtn');
+    if (btn) {
+      btn.dataset.loading = 'false';
+      btn.textContent = 'Start 7-day free trial';
+      btn.style.opacity = '1';
+    }
+  }
+});
 
 function checkPremiumReturn() {
   const params = new URLSearchParams(window.location.search);
