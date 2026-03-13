@@ -1076,6 +1076,7 @@ async function finishOnboarding() {
 // ── NAVIGATION ──
 let currentPage = 'onboarding';
 function navigate(page) {
+  if (page === currentPage) return;
   const old = document.getElementById('page-'+currentPage);
   old.classList.add('exit-left');
   setTimeout(()=>{ old.classList.remove('active','exit-left'); },220);
