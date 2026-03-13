@@ -1069,6 +1069,36 @@ async function finishOnboarding() {
   showLoading('Saving your profile...');
   await dbSaveUser();
   await dbSaveHabits();
+  // check if user arrived via an invite link — auto-friend the inviter
+  const refParam = new URLSearchParams(window.location.search).get('ref');
+  if (refParam && state.userId) {
+    try {
+      // ref could be a username or a user ID
+      let inviter = null;
+      // try username first
+      const { data: byUsername } = await sb.from('users').select('id,name').eq('username', refParam).maybeSingle();
+      if (byUsername) inviter = byUsername;
+      else {
+        // try by user id
+        const { data: byId } = await sb.from('users').select('id,name').eq('id', refParam).maybeSingle();
+        if (byId) inviter = byId;
+      }
+      if (inviter && inviter.id !== state.userId) {
+        // create accepted friendship both ways immediately
+        await sb.from('friendships').upsert(
+          { user_id: state.userId, friend_id: inviter.id, status: 'accepted' },
+          { onConflict: 'user_id,friend_id' }
+        );
+        await sb.from('friendships').upsert(
+          { user_id: inviter.id, friend_id: state.userId, status: 'accepted' },
+          { onConflict: 'user_id,friend_id' }
+        );
+        showToast('Auto-added ' + inviter.name + ' as a friend! 👋');
+      }
+    } catch(e) { console.warn('ref auto-friend:', e); }
+    // clean up the URL
+    window.history.replaceState({}, '', window.location.pathname);
+  }
   hideLoading();
   navigate('home');
 }
@@ -1951,12 +1981,13 @@ function nudgeFriend(friendId, name) {
 }
 
 function shareInvite() {
-  const url = window.location.origin + window.location.pathname;
-  const text = 'Join me on StreakFit! I\'m on a ' + state.streakDays + '-day streak. Can you beat me? ' + url;
+  const base = window.location.origin + window.location.pathname;
+  const url = base + '?ref=' + encodeURIComponent(state.username || loadUserId());
+  const text = 'Join me on StreakFit! I\'m on a ' + state.streakDays + '-day streak 🔥 Can you beat me? ' + url;
   if (navigator.share) {
     navigator.share({ title: 'StreakFit', text, url });
   } else {
-    navigator.clipboard.writeText(text).then(() => showToast('Invite link copied! 📋'));
+    navigator.clipboard.writeText(url).then(() => showToast('Invite link copied! 📋'));
   }
 }
 
