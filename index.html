@@ -69,7 +69,7 @@ body {
 .toast.show { transform:translateX(-50%) translateY(0); }
 
 /* ── ONBOARDING ── */
-#page-onboarding { padding-bottom:160px; }
+#page-onboarding { padding-bottom:200px; }
 .ob-progress {
   position:fixed; top:0; left:50%; transform:translateX(-50%);
   width:100%; max-width:420px; padding:52px 24px 14px;
@@ -84,8 +84,8 @@ body {
 .ob-skip { font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; }
 .ob-cta {
   position:fixed; bottom:0; left:50%; transform:translateX(-50%);
-  width:100%; max-width:420px; padding:12px 20px 36px;
-  background:linear-gradient(to top, var(--bg) 75%, transparent); z-index:50;
+  width:100%; max-width:420px; padding:24px 20px 44px;
+  background:linear-gradient(to top, var(--bg) 60%, transparent); z-index:50;
   pointer-events:none;
 }
 .ob-cta > * { pointer-events:all; }
@@ -1780,37 +1780,44 @@ async function addFriend() {
   const input = document.getElementById('friendUsernameInput');
   const username = input.value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
   if (!username) { showToast('Enter a username'); return; }
-  // if userId missing, try reloading from localStorage
-  if (!state.userId) {
-    const savedId = localStorage.getItem('sf_uid');
-    if (savedId) { await dbLoadUser(savedId); }
-    if (!state.userId) { showToast('Please sign in first'); return; }
-  }
 
-  // find user by username
+  // get userId from state OR localStorage directly — don't rely on reload
+  const uid = state.userId || localStorage.getItem('sf_uid');
+  if (!uid) { showToast('Please complete onboarding first'); return; }
+
   try {
-    const { data: friend } = await sb.from('users').select('id,name,username,streak_days').eq('username', username).single();
+    // find user by username
+    const { data: friend } = await sb.from('users')
+      .select('id,name,username,streak_days')
+      .eq('username', username)
+      .maybeSingle();
     if (!friend) { showToast('User @' + username + ' not found'); return; }
-    if (friend.id === state.userId) { showToast('That\'s you!'); return; }
+    if (friend.id === uid) { showToast('That\'s you! 😄'); return; }
 
     // check not already friends or pending
     const { data: existing } = await sb.from('friendships')
-      .select('id,status').eq('user_id', state.userId).eq('friend_id', friend.id).single();
+      .select('id,status')
+      .eq('user_id', uid)
+      .eq('friend_id', friend.id)
+      .maybeSingle();
     if (existing) {
       showToast(existing.status === 'pending' ? 'Request already sent!' : 'Already friends!');
       return;
     }
+
     // send friend request
     const { error } = await sb.from('friendships').insert({
-      user_id: state.userId, friend_id: friend.id, status: 'pending'
+      user_id: uid, friend_id: friend.id, status: 'pending'
     });
     if (error) throw error;
     input.value = '';
     showToast('Friend request sent to @' + username + '! 📨');
+    // also sync state.userId in case it was missing
+    if (!state.userId) state.userId = uid;
     await loadFriends();
   } catch(e) {
-    console.warn('addFriend:', e);
-    showToast('Could not find @' + username);
+    console.warn('addFriend error:', e);
+    showToast('Something went wrong — try again');
   }
 }
 
