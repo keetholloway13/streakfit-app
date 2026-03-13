@@ -83,10 +83,12 @@ body {
 .ob-dot.inactive { width:8px; }
 .ob-skip { font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; }
 .ob-cta {
-  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
-  width:100%; max-width:420px; padding:14px 24px 34px;
+  position:sticky; bottom:0; left:0;
+  width:100%; padding:14px 24px 34px;
   background:linear-gradient(to top, var(--bg) 70%, transparent); z-index:50;
+  margin-top:auto;
 }
+#page-onboarding { display:flex; flex-direction:column; }
 .ob-btn {
   width:100%; padding:15px; border-radius:14px; background:var(--purple); color:#EEEEFF;
   font-size:16px; font-weight:600; border:none; cursor:pointer; font-family:'DM Sans',sans-serif,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;
@@ -737,6 +739,12 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
     </div>
   </div>
 
+  <!-- Incoming requests -->
+  <div class="section" style="margin-top:18px;display:none;" id="friendRequestsSection">
+    <div class="section-title" style="margin-bottom:10px;">📨 Friend requests</div>
+    <div id="friendRequestsList"></div>
+  </div>
+
   <!-- Add friend -->
   <div class="section" style="margin-top:18px;">
     <div class="section-title" style="margin-bottom:10px;">Add a friend</div>
@@ -1169,13 +1177,14 @@ async function toggleHabit(id) {
   if (state.rescueActive) {
     const firstRoundDone = state.habits.every(h => h.done);
     if (firstRoundDone) {
-      // they're working on second round now
       state.rescueHabitsDone = state.habits.filter(h => h.done).length;
       updateRescueProgress();
     }
   }
   renderHabits(); updateProgress();
   document.getElementById('streakNum').textContent=state.streakDays;
+  // update calendar in background so today shows as complete
+  buildCalendar();
 }
 
 function updateProgress() {
@@ -1752,14 +1761,20 @@ async function addFriend() {
     if (!friend) { showToast('User @' + username + ' not found'); return; }
     if (friend.id === state.userId) { showToast('That\'s you!'); return; }
 
-    // add friendship
-    const { error } = await sb.from('friendships').upsert(
-      { user_id: state.userId, friend_id: friend.id },
-      { onConflict: 'user_id,friend_id' }
-    );
+    // check not already friends or pending
+    const { data: existing } = await sb.from('friendships')
+      .select('id,status').eq('user_id', state.userId).eq('friend_id', friend.id).single();
+    if (existing) {
+      showToast(existing.status === 'pending' ? 'Request already sent!' : 'Already friends!');
+      return;
+    }
+    // send friend request
+    const { error } = await sb.from('friendships').insert({
+      user_id: state.userId, friend_id: friend.id, status: 'pending'
+    });
     if (error) throw error;
     input.value = '';
-    showToast('Added @' + username + '! 👊');
+    showToast('Friend request sent to @' + username + '! 📨');
     await loadFriends();
   } catch(e) {
     console.warn('addFriend:', e);
@@ -1770,14 +1785,37 @@ async function addFriend() {
 async function loadFriends() {
   if (!state.userId) return;
   try {
-    // get friend IDs
-    const { data: friendships } = await sb.from('friendships').select('friend_id').eq('user_id', state.userId);
-    if (!friendships || friendships.length === 0) {
+    // get accepted friends + pending requests sent to me
+    const { data: myFriendships } = await sb.from('friendships').select('friend_id,status').eq('user_id', state.userId).eq('status','accepted');
+    const { data: incomingRequests } = await sb.from('friendships').select('id,user_id,status').eq('friend_id', state.userId).eq('status','pending');
+
+    // show incoming requests
+    const requestsEl = document.getElementById('friendRequestsList');
+    if (requestsEl) {
+      if (incomingRequests && incomingRequests.length > 0) {
+        const requesterIds = incomingRequests.map(r => r.user_id);
+        const { data: requesters } = await sb.from('users').select('id,name,username').in('id', requesterIds);
+        requestsEl.innerHTML = (requesters||[]).map(u => {
+          const req = incomingRequests.find(r => r.user_id === u.id);
+          return `<div style="background:var(--card);border-radius:var(--radius-sm);border:1px solid var(--amber);padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="font-size:22px;">👋</div>
+            <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--text);">${u.name}</div><div style="font-size:11px;color:var(--muted);">@${u.username} wants to be friends</div></div>
+            <button onclick="acceptFriend('${req.id}','${u.name}')" style="padding:6px 10px;border-radius:8px;background:var(--green-bg);color:var(--green);font-size:11px;font-weight:600;border:none;cursor:pointer;font-family:inherit;">Accept</button>
+            <button onclick="declineFriend('${req.id}')" style="padding:6px 10px;border-radius:8px;background:var(--card2);color:var(--muted);font-size:11px;font-weight:600;border:none;cursor:pointer;font-family:inherit;">Decline</button>
+          </div>`;
+        }).join('');
+        document.getElementById('friendRequestsSection').style.display = 'block';
+      } else {
+        document.getElementById('friendRequestsSection').style.display = 'none';
+      }
+    }
+
+    if (!myFriendships || myFriendships.length === 0) {
       document.getElementById('friendsCount').textContent = '0 friends';
-      document.getElementById('friendsList').innerHTML = '<div style="text-align:center;padding:30px 20px;color:var(--muted);font-size:13px;line-height:1.6;"><div style="font-size:32px;margin-bottom:10px;">👥</div>Add friends by username to see their streaks here</div>';
+      document.getElementById('friendsList').innerHTML = '<div style="text-align:center;padding:30px 20px;color:var(--muted);font-size:13px;line-height:1.6;"><div style="font-size:32px;margin-bottom:10px;">👥</div>Add friends by @username to see their streaks here</div>';
       return;
     }
-    const friendIds = friendships.map(f => f.friend_id);
+    const friendIds = myFriendships.map(f => f.friend_id);
 
     // get friend profiles
     const { data: friends } = await sb.from('users').select('id,name,username,streak_days').in('id', friendIds);
@@ -1813,6 +1851,27 @@ async function loadFriends() {
       </div>`;
     }).join('');
   } catch(e) { console.warn('loadFriends:', e); }
+}
+
+async function acceptFriend(requestId, name) {
+  try {
+    await sb.from('friendships').update({ status: 'accepted' }).eq('id', requestId);
+    // also create reverse friendship
+    const { data: req } = await sb.from('friendships').select('user_id,friend_id').eq('id', requestId).single();
+    if (req) {
+      await sb.from('friendships').upsert({ user_id: req.friend_id, friend_id: req.user_id, status: 'accepted' }, { onConflict: 'user_id,friend_id' });
+    }
+    showToast('You and ' + name + ' are now friends! 🎉');
+    await loadFriends();
+  } catch(e) { showToast('Something went wrong'); }
+}
+
+async function declineFriend(requestId) {
+  try {
+    await sb.from('friendships').delete().eq('id', requestId);
+    showToast('Request declined');
+    await loadFriends();
+  } catch(e) {}
 }
 
 function nudgeFriend(friendId, name) {
