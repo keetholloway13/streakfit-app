@@ -588,7 +588,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
     </div>
   </div>
 
-  <div class="section" style="margin-top:18px;">
+  <div class="section" id="streakUpsellSection" style="margin-top:18px;">
     <div class="upsell-card">
       <div class="upsell-head">
         <div><div class="upsell-title">Go Premium</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">Never stress about streaks again</div></div>
@@ -646,7 +646,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; h
     <button onclick="openAddHabit()" style="width:100%;padding:13px;border-radius:var(--radius-sm);background:var(--purple-bg);color:var(--purple-light);font-size:14px;font-weight:600;border:1.5px dashed rgba(124,111,247,0.3);cursor:pointer;font-family:inherit;margin-top:2px;">+ Add new habit</button>
   </div>
 
-  <div class="section" style="margin-top:20px;">
+  <div class="section" id="profileUpsellSection" style="margin-top:20px;">
     <div class="section-title" style="margin-bottom:12px;">Premium</div>
     <div class="card" style="padding:16px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
@@ -1421,6 +1421,8 @@ function buildBreakdown() {
 
 // ── STREAK ──
 async function renderStreak() {
+  const streakUpsell = document.getElementById('streakUpsellSection');
+  if (streakUpsell) streakUpsell.style.display = state.isPremium ? 'none' : 'block';
   // check if user missed yesterday
   const missed = await checkMissedYesterday();
   state.missedYesterday = missed;
@@ -1670,6 +1672,9 @@ function renderProfile() {
   document.getElementById('profileName').textContent = state.name || 'User';
   document.getElementById('profileStreak').textContent = state.streakDays + ' days';
   document.getElementById('profileHabits').textContent = state.habits.length + ' active';
+  // show/hide upsell section
+  const profileUpsell = document.getElementById('profileUpsellSection');
+  if (profileUpsell) profileUpsell.style.display = state.isPremium ? 'none' : 'block';
   // update plan label
   const planEl = document.querySelector('#page-profile .card div div:nth-child(2)');
   if (planEl) planEl.textContent = state.isPremium ? '⭐ Premium' : 'Free plan';
@@ -2022,8 +2027,11 @@ async function checkPremiumReturn() {
     state.freezeUsed = false;
     state.rescueUsed = false;
     await dbSaveUser();
-    showOverlay('🎉', 'Welcome to Premium!', 'Your 7-day free trial has started. You now have 3 freezes/month and unlimited rescues.');
     window.history.replaceState({}, '', window.location.pathname);
+    // re-render whichever pages are affected
+    if (currentPage === 'profile') renderProfile();
+    if (currentPage === 'streak') renderStreak();
+    showOverlay('🎉', 'Welcome to Premium!', 'Your 7-day free trial has started. You now have 3 freezes/month and unlimited rescues.');
   }
 }
 
