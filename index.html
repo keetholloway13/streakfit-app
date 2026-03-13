@@ -1828,11 +1828,8 @@ async function loadFriends() {
   if (!uid) return;
   try {
     // get accepted friends + pending requests sent to me
-    const { data: myFriendships, error: fsError } = await sb.from('friendships').select('friend_id,status').eq('user_id', uid).eq('status','accepted');
-    const { data: incomingRequests, error: irError } = await sb.from('friendships').select('id,user_id,status').eq('friend_id', uid).eq('status','pending');
-    console.log('uid:', uid);
-    console.log('myFriendships:', JSON.stringify(myFriendships), 'error:', fsError);
-    console.log('incomingRequests:', JSON.stringify(incomingRequests), 'error:', irError);
+    const { data: myFriendships } = await sb.from('friendships').select('friend_id,status').eq('user_id', uid).eq('status','accepted');
+    const { data: incomingRequests } = await sb.from('friendships').select('id,user_id,status').eq('friend_id', uid).eq('status','pending');
 
     // show incoming requests
     const requestsEl = document.getElementById('friendRequestsList');
