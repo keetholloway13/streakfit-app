@@ -1458,8 +1458,16 @@ async function renderStreak() {
 }
 
 async function checkMissedYesterday() {
-  if (!state.userId || state.habits.length === 0) return false;
+  if (!state.userId || state.habits.length === 0 || state.streakDays === 0) return false;
   try {
+    // check if user account is older than 1 day — new users can't have missed yesterday
+    const { data: user } = await sb.from('users').select('created_at').eq('id', state.userId).single();
+    if (user) {
+      const createdAt = new Date(user.created_at);
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      if (createdAt >= today) return false; // signed up today, can't have missed yesterday
+    }
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yDate = yesterday.toISOString().split('T')[0];
@@ -1467,7 +1475,6 @@ async function checkMissedYesterday() {
       .select('habit_id')
       .eq('user_id', state.userId)
       .eq('done_at', yDate);
-    // missed if no logs at all yesterday
     return !logs || logs.length === 0;
   } catch(e) { return false; }
 }
@@ -1773,7 +1780,12 @@ async function addFriend() {
   const input = document.getElementById('friendUsernameInput');
   const username = input.value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
   if (!username) { showToast('Enter a username'); return; }
-  if (!state.userId) { showToast('Please complete onboarding first'); return; }
+  // if userId missing, try reloading from localStorage
+  if (!state.userId) {
+    const savedId = localStorage.getItem('sf_uid');
+    if (savedId) { await dbLoadUser(savedId); }
+    if (!state.userId) { showToast('Please sign in first'); return; }
+  }
 
   // find user by username
   try {
